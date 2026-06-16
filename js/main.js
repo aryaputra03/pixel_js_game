@@ -81,7 +81,7 @@ import {
   updateKeyAnimation,
   renderKeyAnimation,
   isKeyAnimationActive,
-} from './KeyAnimation.js';
+} from './Keyanimation.js';
 
 // ============================================
 // CANVAS SETUP
