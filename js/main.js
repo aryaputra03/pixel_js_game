@@ -50,7 +50,7 @@ import {
   markCafeNPCInteracted,
   allCafeNPCsInteracted,
   isCafeNPCInteracted,
-} from './MapRendererCafe.js';
+} from './MaprendererCafe.js';
 import { CAFE_SPAWN, TILE_SIZE_CAFE, CAFE_NPCS } from './maps_cafe.js';
 import {
   renderGardenMap,
