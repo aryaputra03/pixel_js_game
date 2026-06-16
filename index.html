@@ -21,12 +21,8 @@
   <body>
     <!-- ============================================
          LOGIN SCREEN — Password Gate
-         Tampil sebelum game dimulai.
-         Disembunyikan setelah password benar (JS).
-         z-index: 300 — di atas segalanya.
     ============================================ -->
     <div id="login-screen">
-      <!-- Kue ulang tahun + judul -->
       <div class="login-cake">🎂</div>
 
       <div class="login-title-wrap">
@@ -34,7 +30,6 @@
         <div class="login-subtitle">— SECRET ACCESS —</div>
       </div>
 
-      <!-- Kotak password RPG -->
       <div class="login-box">
         <div class="login-instruction">
           Selesaikan soal berikut untuk<br />mendapatkan password masuk!
@@ -42,7 +37,6 @@
 
         <div class="login-question-label">✦ SOAL MATEMATIKA ✦</div>
 
-        <!-- Soal matematika yang hasilnya 22 -->
         <div class="login-question-box">
           <div class="login-question-text">( 4² + 3² ) − ( 5 − 4 )</div>
           <div class="login-question-hint">
@@ -50,7 +44,6 @@
           </div>
         </div>
 
-        <!-- Input jawaban -->
         <div class="login-input-wrap">
           <span class="login-input-label">JAWABAN ▶</span>
           <input
@@ -63,17 +56,13 @@
           />
         </div>
 
-        <!-- Tombol masuk -->
         <button id="login-btn">▷ MASUK KE GAME</button>
 
-        <!-- Feedback teks salah / benar -->
         <div id="login-feedback"></div>
       </div>
-      <!-- /.login-box -->
 
       <div class="login-footer">PRESS START TO PLAY · HAPPY BIRTHDAY · 🎉</div>
     </div>
-    <!-- /#login-screen -->
 
     <!-- ============================================
          ORIENTATION OVERLAY — "Putar HP-mu"
@@ -130,26 +119,29 @@
       <!-- Fade overlay -->
       <div id="fade-overlay"></div>
 
-      <!-- Debug panel -->
+      <!-- DEBUG PANEL — dihapus dari HTML                ← DIUBAH
+           Tidak lagi dirender ke DOM.
+           Untuk development, uncomment blok di bawah:
       <div id="debug-panel">
-        <span id="debug-fps">FPS: --</span>
-        <span id="debug-phase">Phase: --</span>
-        <span id="debug-keys">Keys: --</span>
+        <span id="debug-fps">FPS: - -</span>
+        <span id="debug-phase">Phase: - -</span>
+        <span id="debug-keys">Keys: - -</span>
       </div>
+      -->
     </div>
 
     <!-- ============================================
          VIRTUAL D-PAD + ANALOG STICK
     ============================================ -->
     <div id="dpad-container">
+      <div id="analog-stick">
+        <div id="analog-knob"></div>
+      </div>
       <div id="dpad">
         <button class="dpad-btn" id="btn-up" data-key="ArrowUp">▲</button>
         <button class="dpad-btn" id="btn-left" data-key="ArrowLeft">◀</button>
         <button class="dpad-btn" id="btn-right" data-key="ArrowRight">▶</button>
         <button class="dpad-btn" id="btn-down" data-key="ArrowDown">▼</button>
-      </div>
-      <div id="analog-stick">
-        <div id="analog-knob"></div>
       </div>
       <div id="action-buttons">
         <button class="action-btn" id="btn-action" data-key="e">E</button>
@@ -158,44 +150,25 @@
     </div>
 
     <!-- ============================================
-         LOGIN LOGIC — inline script
-         Dijalankan sebelum main.js (module) agar
-         bisa dispatch event 'gameUnlocked' saat
-         password benar, dan main.js mendengarkan.
-
-         Jawaban: 22
-         Soal: (4² + 3²) − (5 − 4) = (16 + 9) − 1 = 25 − 1 = ... 
-         
-         Tunggu — kita cek ulang soalnya:
-         (4² + 3²) − (5 − 4) = 25 − 1 = 24 ← terlalu mudah terdeteksi
-         
-         Soal yang dipakai: (4² + 3²) − (5 − 4) menghasilkan 24 bukan 22.
-         Soal yang BENAR untuk hasil 22:
-           4² + 4 + 2 = 16 + 4 + 2 = 22  ← terlalu mudah
-           (5 × 4) + 2 = 22               ← cukup
-           2² × 5 + 2 = 22                ← bagus
-           ( 6² − 2 ) / 2 + 5 = 22        ← terlalu rumit
-         
-         Soal final dipilih: (4² + 3²) − 3 = 25 − 3 = 22  ← DIPAKAI
-         Mudah, elegan, bisa dikerjakan kepala.
+         LOGIN LOGIC
+         Jawaban: 24
+         Soal: (4² + 3²) − (5 − 4) = (16 + 9) − 1 = 24
     ============================================ -->
     <script>
       (function () {
-        const CORRECT_ANSWER = 22;
+        const CORRECT_ANSWER = 24;
 
         const screen = document.getElementById('login-screen');
         const input = document.getElementById('login-input');
         const btn = document.getElementById('login-btn');
         const feedback = document.getElementById('login-feedback');
 
-        /* ── Bersihkan state input saat mulai mengetik ── */
         input.addEventListener('input', function () {
           input.classList.remove('input-error', 'input-success');
           feedback.textContent = '';
           feedback.className = '';
         });
 
-        /* ── Enter juga trigger submit ── */
         input.addEventListener('keydown', function (e) {
           if (e.key === 'Enter') attemptLogin();
         });
@@ -204,17 +177,12 @@
 
         function attemptLogin() {
           const val = parseInt(input.value.trim(), 10);
-
           if (isNaN(val)) {
             showError('Masukkan angka dulu!');
             return;
           }
-
-          if (val === CORRECT_ANSWER) {
-            showSuccess();
-          } else {
-            showError('Jawaban salah... coba lagi!');
-          }
+          if (val === CORRECT_ANSWER) showSuccess();
+          else showError('Jawaban salah... coba lagi!');
         }
 
         function showError(msg) {
@@ -222,8 +190,6 @@
           input.classList.add('input-error');
           feedback.className = 'feedback-error';
           feedback.textContent = '✗ ' + msg;
-
-          /* Hapus class error setelah animasi selesai */
           setTimeout(function () {
             input.classList.remove('input-error');
           }, 400);
@@ -236,19 +202,15 @@
           feedback.textContent = '✓ Benar! Selamat datang...';
           btn.disabled = true;
 
-          /* Tunggu sebentar lalu fade out dan nyalakan game */
           setTimeout(function () {
             screen.classList.add('fade-out');
-
             setTimeout(function () {
               screen.classList.add('hidden');
-              /* Beritahu main.js bahwa login berhasil */
               window.dispatchEvent(new CustomEvent('gameUnlocked'));
-            }, 650); /* sesuai transition: opacity 0.6s di CSS */
-          }, 800); /* delay 0.8 detik agar player sempat baca feedback */
+            }, 650);
+          }, 800);
         }
 
-        /* Fokus otomatis ke input saat halaman siap */
         window.addEventListener('load', function () {
           setTimeout(function () {
             input.focus();

@@ -1,4 +1,15 @@
 /* ============================================
+   main.css — Base Layout & Controls
+   Birthday Quest RPG
+   
+   Perubahan dari versi sebelumnya:
+   [1] #debug-panel: display none — disembunyikan
+   [2] #game-canvas: fullscreen stretch (position fixed, 
+       width/height 100%) — tidak ada letterbox hitam
+   [3] Analog stick: diperbesar (120px base, 140px landscape)
+============================================ */
+
+/* ============================================
    RESET & BASE
 ============================================ */
 *,
@@ -13,39 +24,37 @@ html,
 body {
   width: 100%;
   height: 100%;
-  overflow: hidden; /* no scroll — game fullscreen */
+  overflow: hidden;
   background: #0d0d0d;
   font-family: monospace;
-
-  /* Cegah browser nge-zoom/scroll saat user nge-drag analog stick   ← BARU */
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
-
-  /* Anti-blur tambahan untuk teks DOM (HUD, dialog) di device retina ← BARU */
   -webkit-font-smoothing: none;
   text-rendering: optimizeSpeed;
 }
 
 /* ============================================
-   CANVAS — game world
-   Mobile-first: canvas mengisi layar penuh,
-   aspect ratio dijaga via JS (lihat main.js)
+   CANVAS — FULLSCREEN                         ← DIUBAH
+   Canvas mengisi seluruh layar tanpa letterbox.
+   Posisi, ukuran, dan transform di-set via JS
+   (resizeCanvas di main.js).
+   Di sini hanya pixel-art rendering directive.
 ============================================ */
 #game-canvas {
   display: block;
   position: fixed;
   top: 0;
   left: 0;
-
-  /* Canvas di-center jika layar lebih lebar dari game */
-  image-rendering: pixelated; /* pixel art crisp, tidak blur */
-  image-rendering: -moz-crisp-edges; /* Firefox                      ← BARU */
+  width: 100%; /* default — JS akan override dengan px exact */
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
 }
 
 /* ============================================
-   UI OVERLAY — layer di atas canvas
+   UI OVERLAY
 ============================================ */
 #ui-overlay {
   position: fixed;
@@ -53,24 +62,26 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  pointer-events: none; /* klik tembus ke canvas kecuali elemen tertentu */
+  pointer-events: none;
   z-index: 10;
 }
 
-/* Utility: sembunyikan elemen UI yang belum aktif */
 .hidden {
   display: none !important;
 }
 
 /* ============================================
-   DEBUG PANEL — info developer
-   Posisi kiri atas, font kecil, semi-transparan
+   DEBUG PANEL — DISEMBUNYIKAN                 ← DIUBAH
+   Disembunyikan di production.
+   JS juga menyembunyikannya via style.display = 'none'.
+   Untuk mengaktifkan saat development:
+   hapus rule display: none di bawah.
 ============================================ */
 #debug-panel {
+  display: none; /* ← DISEMBUNYIKAN */
   position: absolute;
   top: 8px;
   left: 8px;
-  display: flex;
   flex-direction: column;
   gap: 2px;
   pointer-events: none;
@@ -87,8 +98,6 @@ body {
 
 /* ============================================
    VIRTUAL D-PAD — kontrol mobile
-   Posisi: kiri bawah untuk D-pad, kanan bawah untuk aksi
-   Layout menggunakan CSS Grid untuk posisi 4 arah
 ============================================ */
 #dpad-container {
   position: fixed;
@@ -100,13 +109,10 @@ body {
   align-items: flex-end;
   padding: 16px 24px 24px;
   z-index: 20;
-  pointer-events: none; /* container tembus, tombol aktif sendiri */
-
-  /* Sembunyikan di desktop — keyboard sudah cukup */
-  display: none;
+  pointer-events: none;
+  display: none; /* Sembunyikan di desktop */
 }
 
-/* D-pad: grid 3x3, tombol di posisi T (atas-kiri-kanan-bawah) */
 #dpad {
   display: grid;
   grid-template-columns: repeat(3, 48px);
@@ -115,7 +121,6 @@ body {
   pointer-events: auto;
 }
 
-/* Posisi tombol di grid */
 #btn-up {
   grid-column: 2;
   grid-row: 1;
@@ -133,7 +138,6 @@ body {
   grid-row: 3;
 }
 
-/* Styling tombol D-pad */
 .dpad-btn {
   width: 48px;
   height: 48px;
@@ -143,9 +147,9 @@ body {
   color: white;
   font-size: 16px;
   cursor: pointer;
-  -webkit-tap-highlight-color: transparent; /* hapus highlight bawaan mobile */
+  -webkit-tap-highlight-color: transparent;
   user-select: none;
-  touch-action: manipulation; /* responsif, tidak delay 300ms */
+  touch-action: manipulation;
   transition: background 0.05s;
   display: flex;
   align-items: center;
@@ -158,7 +162,9 @@ body {
   border-color: rgba(255, 255, 255, 0.7);
 }
 
-/* Tombol aksi (E dan OK/Skip) */
+/* ============================================
+   TOMBOL AKSI (E dan OK/Skip)
+============================================ */
 #action-buttons {
   display: flex;
   flex-direction: column;
@@ -168,13 +174,13 @@ body {
 }
 
 .action-btn {
-  width: 56px;
-  height: 56px;
+  width: 60px; /* sedikit lebih besar dari sebelumnya (56px) */
+  height: 60px;
   background: rgba(100, 180, 255, 0.2);
   border: 2px solid rgba(100, 180, 255, 0.5);
   border-radius: 50%;
   color: white;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: bold;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -192,22 +198,18 @@ body {
 
 /* ============================================
    RESPONSIVE — tampilkan D-pad di touch device
-   
-   Strategi: gunakan media query hover: none
-   sebagai sinyal utama touch device.
-   CSS saja tidak 100% akurat, JS akan verify ulang.
 ============================================ */
 @media (hover: none) and (pointer: coarse) {
   #dpad-container {
-    display: flex; /* tampilkan D-pad di touch device */
+    display: flex;
   }
 
   #debug-panel span {
-    font-size: 9px; /* lebih kecil di HP */
+    font-size: 9px;
   }
 }
 
-/* Landscape HP: perkecil d-pad biar tidak makan tempat */
+/* Landscape HP */
 @media (hover: none) and (pointer: coarse) and (orientation: landscape) {
   #dpad-container {
     padding: 8px 16px 12px;
@@ -225,15 +227,13 @@ body {
   }
 
   .action-btn {
-    width: 46px;
-    height: 46px;
+    width: 54px;
+    height: 54px;
   }
 }
 
 /* ============================================
-   ORIENTATION OVERLAY — "Putar HP-mu"          ← BARU
-   Tampil saat device touch dalam mode portrait.
-   Game ini didesain landscape (480x320).
+   ORIENTATION OVERLAY — "Putar HP-mu"
 ============================================ */
 #orientation-overlay {
   position: fixed;
@@ -284,22 +284,24 @@ body {
 }
 
 /* ============================================
-   ANALOG STICK — virtual joystick mobile        ← BARU
-   Pengganti/pelengkap d-pad: lebih natural untuk
-   gerakan bebas 360° termasuk diagonal.
-   Posisi: kiri bawah, menggantikan posisi d-pad lama
-   di layout landscape mobile.
+   ANALOG STICK — DIPERBESAR                  ← DIUBAH
+   
+   Ukuran sebelumnya: 96px
+   Ukuran baru: 120px (base) → lebih mudah dijangkau jempol
+   
+   Knob sebelumnya: 44px
+   Knob baru: 54px
 ============================================ */
 #analog-stick {
   position: fixed;
-  bottom: 28px;
-  left: 28px;
-  width: 96px;
-  height: 96px;
+  bottom: 24px;
+  left: 24px;
+  width: 120px; /* ← DIPERBESAR dari 96px */
+  height: 120px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.08);
   border: 2px solid rgba(255, 255, 255, 0.25);
-  display: none; /* default desktop: sembunyi, sama seperti dpad lama */
+  display: none;
   align-items: center;
   justify-content: center;
   z-index: 25;
@@ -314,15 +316,14 @@ body {
 }
 
 #analog-knob {
-  width: 44px;
-  height: 44px;
+  width: 54px; /* ← DIPERBESAR dari 44px */
+  height: 54px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.35);
   border: 2px solid rgba(255, 255, 255, 0.7);
   transition:
     background 0.05s,
     border-color 0.05s;
-  /* transform di-set via JS (translate dx, dy) */
   will-change: transform;
 }
 
@@ -332,22 +333,15 @@ body {
 }
 
 /* ============================================
-   MOBILE LANDSCAPE LAYOUT                       ← BARU
-   Saat HP dalam mode landscape (lebar > tinggi, touch device):
-     - Analog stick muncul di kiri bawah
-     - D-pad lama disembunyikan (digantikan analog stick)
-     - Tombol aksi (E / Skip) tetap di kanan bawah, sedikit
-       diperbesar & dirapatkan ke tepi agar mudah dijangkau jempol
-     - Debug panel diperkecil supaya tidak makan tempat
+   MOBILE LANDSCAPE — analog stick tampil
 ============================================ */
 @media (hover: none) and (pointer: coarse) and (orientation: landscape) {
-  /* Sembunyikan d-pad tombol lama — diganti analog stick */
+  /* Sembunyikan d-pad tombol — diganti analog stick */
   #dpad {
     display: none;
   }
 
   #dpad-container {
-    /* Container tetap dipakai untuk membungkus action-buttons saja */
     justify-content: flex-end;
     padding: 0 20px 20px;
   }
@@ -355,6 +349,13 @@ body {
   /* Tampilkan analog stick */
   #analog-stick {
     display: flex;
+    width: 140px; /* ← LANDSCAPE: sedikit lebih besar lagi */
+    height: 140px;
+  }
+
+  #analog-knob {
+    width: 62px;
+    height: 62px;
   }
 
   #action-buttons {
@@ -362,9 +363,9 @@ body {
   }
 
   .action-btn {
-    width: 52px;
-    height: 52px;
-    font-size: 10px;
+    width: 58px;
+    height: 58px;
+    font-size: 11px;
   }
 
   #debug-panel {
@@ -373,23 +374,23 @@ body {
   }
 }
 
-/* HP landscape SANGAT pendek (mis. iPhone SE landscape ~375x667→667x375) */
+/* HP landscape SANGAT pendek */
 @media (hover: none) and (pointer: coarse) and (orientation: landscape) and (max-height: 400px) {
   #analog-stick {
-    width: 80px;
-    height: 80px;
-    bottom: 16px;
-    left: 16px;
+    width: 100px;
+    height: 100px;
+    bottom: 14px;
+    left: 14px;
   }
 
   #analog-knob {
-    width: 36px;
-    height: 36px;
+    width: 46px;
+    height: 46px;
   }
 
   .action-btn {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
   }
 
   #dpad-container {
@@ -397,23 +398,23 @@ body {
   }
 }
 
-/* Tablet landscape — analog stick & tombol sedikit lebih besar */
+/* Tablet landscape — lebih besar lagi */
 @media (hover: none) and (pointer: coarse) and (orientation: landscape) and (min-width: 900px) {
   #analog-stick {
-    width: 110px;
-    height: 110px;
+    width: 150px;
+    height: 150px;
     bottom: 36px;
     left: 36px;
   }
 
   #analog-knob {
-    width: 50px;
-    height: 50px;
+    width: 68px;
+    height: 68px;
   }
 
   .action-btn {
-    width: 60px;
-    height: 60px;
-    font-size: 12px;
+    width: 66px;
+    height: 66px;
+    font-size: 13px;
   }
 }

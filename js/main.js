@@ -3,16 +3,12 @@
 // Birthday Quest RPG
 //
 // Perubahan dari versi sebelumnya:
-//
-// [GARDEN NPC — Kucing & Hamster]
-//   - Import getNearbyNPCGarden, renderGardenNPCs,
-//     markGardenNPCInteracted dari MapRendererGarden
-//   - Import GARDEN_NPCS dari maps_garden
-//   - nearbyGardenNPC: tracking hewan NPC terdekat di taman
-//   - _currentGardenNPCId: tracking NPC hewan yang sedang diajak ngobrol
-//   - DialogEngine._onDialogClose: extended untuk handle NPC taman
-//   - updateGarden(): extended dengan NPC animal interaction
-//   - renderGarden(): extended dengan renderGardenNPCs
+//   [1] DEBUG PANEL DIHAPUS — FPS/Phase/Keys tidak ditampilkan
+//   [2] resizeCanvas() → FULLSCREEN mode:
+//       canvas mengisi SELURUH layar tanpa letterbox hitam.
+//       Game di-stretch ke ukuran layar penuh dengan tetap
+//       menjaga koordinat logis 480x320 lewat ctx.setTransform.
+//   [3] Analog stick tetap ada, ukuran dikendalikan CSS.
 // ============================================
 
 import { setupDpad, setupAnalogStick } from './input.js';
@@ -58,11 +54,11 @@ import {
   renderGardenExitPrompt,
   isSolidGardenAtPixel,
   isNearGardenExit,
-  getNearbyNPCGarden, // ← BARU
-  renderGardenNPCs, // ← BARU
-  markGardenNPCInteracted, // ← BARU
+  getNearbyNPCGarden,
+  renderGardenNPCs,
+  markGardenNPCInteracted,
 } from './MapRendererGarden.js';
-import { GARDEN_SPAWN, TILE_SIZE_GARDEN, GARDEN_NPCS } from './maps_garden.js'; // ← GARDEN_NPCS BARU
+import { GARDEN_SPAWN, TILE_SIZE_GARDEN, GARDEN_NPCS } from './maps_garden.js';
 import { TILE_SIZE } from '../data/maps.js';
 import {
   renderNPCs,
@@ -94,52 +90,44 @@ export const GAME_WIDTH = 480;
 export const GAME_HEIGHT = 320;
 
 // ============================================
-// RESIZE CANVAS — DPR-AWARE (anti-blur)        ← DIPERBAIKI
+// RESIZE CANVAS — FULLSCREEN STRETCH           ← DIUBAH
 //
-// Masalah sebelumnya: canvas.width/height di-set sama dengan
-// GAME_WIDTH/GAME_HEIGHT (480x320), lalu di-stretch lewat CSS
-// ke ukuran layar HP yang jauh lebih besar (misal 800x533px).
-// Browser men-scale bitmap 480x320 itu dengan interpolasi →
-// semua teks pixel-art jadi BURAM (lihat screenshot bug).
+// Sebelumnya: canvas diposisikan dengan letterbox hitam
+// di sisi kiri/kanan agar rasio 3:2 terjaga.
 //
-// Solusi: render di resolusi piksel fisik layar
-// (CSS size × devicePixelRatio), lalu pakai ctx.setTransform()
-// supaya kode gambar (renderMap, drawNPC, dst) TETAP
-// berpikir dalam koordinat logis 480x320 seperti biasa.
-// Hasilnya: tajam di semua device, termasuk HP retina/AMOLED.
+// Sekarang: canvas mengisi SELURUH layar (width & height 100%).
+// Aspect ratio TIDAK dipertahankan — game di-stretch penuh.
+// Ini memberikan area bermain maksimal di HP landscape.
+//
+// Koordinat logis tetap 480x320 — semua kode render
+// tidak perlu berubah. ctx.setTransform menangani pemetaan
+// dari 480x320 ke ukuran fisik layar yang sebenarnya.
 // ============================================
 
-let renderScale = 1; // skala logis→fisik saat ini
+let renderScaleX = 1;
+let renderScaleY = 1;
 
 function resizeCanvas() {
   const screenW = window.innerWidth;
   const screenH = window.innerHeight;
-  const scale = Math.min(screenW / GAME_WIDTH, screenH / GAME_HEIGHT);
-  const scaledW = Math.floor(GAME_WIDTH * scale);
-  const scaledH = Math.floor(GAME_HEIGHT * scale);
-
-  // Ukuran tampilan (CSS) — tetap seperti sebelumnya
-  canvas.style.width = scaledW + 'px';
-  canvas.style.height = scaledH + 'px';
-  canvas.style.left = Math.floor((screenW - scaledW) / 2) + 'px';
-  canvas.style.top = Math.floor((screenH - scaledH) / 2) + 'px';
-
-  // ── KUNCI PERBAIKAN ──
-  // devicePixelRatio: 1 di monitor biasa, 2-3 di HP modern.
-  // Tanpa ini, browser merender 480x320 lalu di-blur-stretch ke ukuran fisik.
   const dpr = window.devicePixelRatio || 1;
 
-  // Resolusi BITMAP aktual = ukuran tampilan × dpr.
-  // Ini yang membuat teks & garis tipis tetap tajam di semua device.
-  canvas.width = Math.round(scaledW * dpr);
-  canvas.height = Math.round(scaledH * dpr);
+  // CSS: isi penuh layar
+  canvas.style.width = screenW + 'px';
+  canvas.style.height = screenH + 'px';
+  canvas.style.left = '0px';
+  canvas.style.top = '0px';
 
-  // Skala konteks gambar supaya 1 unit kode = 1 unit logis game (480x320),
-  // browser yang urus pemetaan ke piksel fisik yang lebih padat.
-  renderScale = (scaledW / GAME_WIDTH) * dpr;
-  ctx.setTransform(renderScale, 0, 0, renderScale, 0, 0);
+  // Bitmap fisik = ukuran CSS × DPR (tajam di layar retina)
+  canvas.width = Math.round(screenW * dpr);
+  canvas.height = Math.round(screenH * dpr);
 
-  // Pixel art tetap kotak-kotak tegas, tidak di-smooth/blur oleh browser
+  // Skala transform: petakan 480x320 logis ke piksel fisik penuh
+  // Sumbu X dan Y bisa berbeda (stretch tanpa letterbox)
+  renderScaleX = (screenW / GAME_WIDTH) * dpr;
+  renderScaleY = (screenH / GAME_HEIGHT) * dpr;
+
+  ctx.setTransform(renderScaleX, 0, 0, renderScaleY, 0, 0);
   ctx.imageSmoothingEnabled = false;
 }
 
@@ -172,24 +160,16 @@ window.addEventListener('keyup', (e) => {
 });
 
 setupDpad(keys);
-setupAnalogStick(keys); // ← BARU: virtual analog stick untuk mobile
+setupAnalogStick(keys);
 
 // ============================================
-// ORIENTATION LOCK PROMPT — "Putar HP-mu"      ← BARU
-//
-// Game ini didesain landscape (480x320 = rasio lebar).
-// Di HP portrait, layar jadi sangat kecil & kontrol sempit.
-// Overlay ini menyuruh pemain memutar HP ke landscape,
-// dan otomatis hilang begitu orientasi berubah.
-// Tidak aktif di desktop (mouse/keyboard) — hanya device
-// dengan ukuran layar sempit (mobile/tablet).
+// ORIENTATION LOCK PROMPT
 // ============================================
 
 const orientationOverlay = document.getElementById('orientation-overlay');
 
 function checkOrientation() {
   if (!orientationOverlay) return;
-
   const isTouchDevice =
     'ontouchstart' in window || navigator.maxTouchPoints > 0;
   const isNarrowPortrait =
@@ -197,7 +177,6 @@ function checkOrientation() {
 
   if (isTouchDevice && isNarrowPortrait) {
     orientationOverlay.classList.remove('hidden');
-    // Pause logic ringan: jangan update game saat overlay tampil
     GameState._orientationBlocked = true;
   } else {
     orientationOverlay.classList.add('hidden');
@@ -212,12 +191,19 @@ window.addEventListener('orientationchange', () =>
 );
 
 // ============================================
-// DEBUG PANEL
+// DEBUG PANEL — DINONAKTIFKAN                  ← DIUBAH
+//
+// Debug panel (FPS / Phase / Keys) disembunyikan
+// dari tampilan. Variabel tetap ada agar tidak error
+// jika ada kode lain yang masih mereferensikannya,
+// tapi updateDebug() tidak menulis ke DOM lagi.
+// Untuk mengaktifkan ulang saat development:
+//   uncomment baris di dalam updateDebug() di bawah.
 // ============================================
 
-const debugFps = document.getElementById('debug-fps');
-const debugPhase = document.getElementById('debug-phase');
-const debugKeys = document.getElementById('debug-keys');
+// Sembunyikan elemen debug panel via JS (backup selain CSS)
+const _debugPanel = document.getElementById('debug-panel');
+if (_debugPanel) _debugPanel.style.display = 'none';
 
 let lastTime = performance.now();
 let frameCount = 0;
@@ -225,19 +211,19 @@ let fps = 0;
 let lastFrameTime = performance.now();
 
 function updateDebug(now) {
-  frameCount++;
-  if (now - lastTime >= 500) {
-    fps = Math.round((frameCount * 1000) / (now - lastTime));
-    frameCount = 0;
-    lastTime = now;
-  }
-  debugFps.textContent = `FPS: ${fps}`;
-  debugPhase.textContent = `Phase: ${GameState.gamePhase} | Map: ${currentMap}`;
-  debugKeys.textContent = `Keys: ${
-    Object.keys(keys)
-      .filter((k) => keys[k])
-      .join(', ') || 'none'
-  }`;
+  // Debug dinonaktifkan untuk production
+  // Uncomment di bawah untuk development:
+  // frameCount++;
+  // if (now - lastTime >= 500) {
+  //   fps = Math.round((frameCount * 1000) / (now - lastTime));
+  //   frameCount = 0; lastTime = now;
+  // }
+  // const debugFps   = document.getElementById('debug-fps');
+  // const debugPhase = document.getElementById('debug-phase');
+  // const debugKeys  = document.getElementById('debug-keys');
+  // if (debugFps)   debugFps.textContent   = `FPS: ${fps}`;
+  // if (debugPhase) debugPhase.textContent = `Phase: ${GameState.gamePhase} | Map: ${currentMap}`;
+  // if (debugKeys)  debugKeys.textContent  = `Keys: ${Object.keys(keys).filter(k => keys[k]).join(', ') || 'none'}`;
 }
 
 // ============================================
@@ -317,14 +303,13 @@ let nearCafeOpenDoor = false;
 let nearCafeExit = false;
 let _currentCafeNPCId = null;
 
-// ── Garden ──                                             ← BARU
-let nearbyGardenNPC = null; // NPC hewan terdekat di taman
+// ── Garden ──
+let nearbyGardenNPC = null;
 let nearGardenExit = false;
-let _currentGardenNPCId = null; // NPC hewan yang sedang diajak ngobrol
+let _currentGardenNPCId = null;
 
 // ============================================
 // HOOK [1] — DialogEngine._onDialogClose
-// Extended: handle NPC map1, café, dan garden
 // ============================================
 
 DialogEngine._onDialogClose = function (dialogId) {
@@ -334,7 +319,6 @@ DialogEngine._onDialogClose = function (dialogId) {
     const isMainNPC = npcList.some((npc) => npc.id === map1NpcId);
     if (isMainNPC) {
       GameState.markNPCInteracted(map1NpcId);
-      console.log(`[main] Map1 NPC dialog closed: ${map1NpcId}`);
     }
     clearCurrentInteractingNPC();
   }
@@ -344,7 +328,6 @@ DialogEngine._onDialogClose = function (dialogId) {
     const isCafeNPC = CAFE_NPCS.some((npc) => npc.id === _currentCafeNPCId);
     if (isCafeNPC) {
       markCafeNPCInteracted(_currentCafeNPCId);
-      console.log(`[main] Café NPC dialog closed: ${_currentCafeNPCId}`);
       if (allCafeNPCsInteracted() && !isCafeDoorUnlocked()) {
         _onCafeAllNPCsInteracted();
       }
@@ -352,16 +335,13 @@ DialogEngine._onDialogClose = function (dialogId) {
     _currentCafeNPCId = null;
   }
 
-  // ── NPC hewan garden ──                                ← BARU
+  // ── NPC hewan garden ──
   if (_currentGardenNPCId) {
     const isGardenAnimal = GARDEN_NPCS.some(
       (npc) => npc.id === _currentGardenNPCId
     );
     if (isGardenAnimal) {
       markGardenNPCInteracted(_currentGardenNPCId);
-      console.log(`[main] Garden NPC dialog closed: ${_currentGardenNPCId}`);
-
-      // Notif lucu setelah menyapa hewan
       const npcData = GARDEN_NPCS.find((n) => n.id === _currentGardenNPCId);
       if (npcData?.type === 'cat') {
         setTimeout(() => {
@@ -386,11 +366,10 @@ DialogEngine._onDialogClose = function (dialogId) {
 };
 
 // ============================================
-// HOOK [2] — GameState._onKeyObtained (Map 1)
+// HOOK [2] — GameState._onKeyObtained
 // ============================================
 
 GameState._onKeyObtained = function () {
-  console.log('[main] Key obtained! Triggering animation & unlock...');
   playKeyAnimation();
   setTimeout(() => {
     QuestManager.showNotif(
@@ -402,7 +381,6 @@ GameState._onKeyObtained = function () {
   }, 300);
   setTimeout(() => {
     unlockDoor();
-    console.log('[main] Map1 door visually unlocked.');
     QuestManager.showNotif(
       '🚪 Pintu Terbuka!',
       'Pergi ke pojok kanan bawah ☕',
@@ -416,7 +394,6 @@ GameState._onKeyObtained = function () {
 // ============================================
 
 function _onCafeAllNPCsInteracted() {
-  console.log('[main] All café NPCs interacted! Unlocking café door...');
   SoundManager.questComplete();
   setTimeout(() => {
     QuestManager.showNotif(
@@ -514,42 +491,30 @@ function updateCafe() {
   }
   if (nearCafeExit && keys['e']) {
     keys['e'] = false;
-    if (!_transitioning) {
-      transitionToMap('map1');
-    }
+    if (!_transitioning) transitionToMap('map1');
     return;
   }
 }
 
 // ============================================
-// UPDATE GARDEN — extended dengan NPC hewan   ← BARU
+// UPDATE GARDEN
 // ============================================
 
 function updateGarden() {
   updatePlayer(keys);
 
   nearGardenExit = isNearGardenExit(GameState.player.x, GameState.player.y);
-
-  // Update proximity NPC hewan                            ← BARU
   nearbyGardenNPC = getNearbyNPCGarden(GameState.player.x, GameState.player.y);
 
-  // ── Interaksi NPC hewan ──                             ← BARU
-  // Prioritas: cek NPC dulu sebelum pintu keluar
-  // agar tidak konflik jika keduanya overlap
   if (nearbyGardenNPC && keys['e']) {
     keys['e'] = false;
     _currentGardenNPCId = nearbyGardenNPC.id;
     DialogEngine.start(nearbyGardenNPC.dialogId);
     return;
   }
-
-  // ── Pintu keluar taman ──
   if (nearGardenExit && keys['e']) {
     keys['e'] = false;
-    if (!_transitioning) {
-      console.log('[main] Leaving garden → back to café');
-      transitionToMap('cafe_from_garden');
-    }
+    if (!_transitioning) transitionToMap('cafe_from_garden');
     return;
   }
 }
@@ -559,7 +524,6 @@ function updateGarden() {
 // ============================================
 
 function update(now) {
-  // ── Blokir update saat overlay "putar HP" tampil ──   ← BARU
   if (GameState._orientationBlocked) return;
 
   if (GameState.gamePhase === 'dialog') {
@@ -622,26 +586,20 @@ function renderCafe() {
   renderPlayer(ctx);
   if (nearCafeExit) renderCafeExitPrompt(ctx);
   if (nearCafeLockedDoor) {
-    const aryaInteracted = isCafeNPCInteracted('cafe_npc_arya');
-    renderCafeLockedDoorPrompt(ctx, aryaInteracted);
+    renderCafeLockedDoorPrompt(ctx, isCafeNPCInteracted('cafe_npc_arya'));
   }
   if (nearCafeOpenDoor) renderCafeOpenDoorPrompt(ctx);
 }
 
 // ============================================
-// RENDER GARDEN — extended dengan NPC hewan   ← BARU
+// RENDER GARDEN
 // ============================================
 
 function renderGarden() {
   renderGardenMap(ctx);
   renderGardenRoomLabels(ctx);
-
-  // Render NPC hewan (di antara map dan player
-  // agar player bisa berjalan "di depan" hewan)
-  renderGardenNPCs(ctx, nearbyGardenNPC); // ← BARU
-
+  renderGardenNPCs(ctx, nearbyGardenNPC);
   renderPlayer(ctx);
-
   if (nearGardenExit) renderGardenExitPrompt(ctx);
 }
 
@@ -688,10 +646,6 @@ function loop(now) {
 // INIT
 // ============================================
 
-// ============================================
-// INIT — dipanggil SETELAH login berhasil
-// ============================================
-
 async function init() {
   try {
     await loadSprites();
@@ -704,36 +658,17 @@ async function init() {
 }
 
 // ============================================
-// LOGIN GATE                                             ← BARU
-//
-// main.js TIDAK langsung memanggil init().
-// Sebaliknya, ia menunggu event 'gameUnlocked'
-// yang di-dispatch oleh inline script di index.html
-// setelah player berhasil memasukkan password yang benar.
-//
-// Kenapa event bukan export/import?
-//   - Login script adalah inline <script> (non-module)
-//     karena harus jalan SEBELUM module dimuat.
-//   - window.dispatchEvent / window.addEventListener
-//     adalah satu-satunya bridge yang andal antara
-//     inline script dan ES module.
+// LOGIN GATE
 // ============================================
 
 window.addEventListener(
   'gameUnlocked',
   function onGameUnlocked() {
-    // Hapus listener agar tidak bisa di-trigger ulang
     window.removeEventListener('gameUnlocked', onGameUnlocked);
     console.log('[BirthdayQuest] Login sukses — memulai game...');
     init();
   },
   { once: true }
-); // { once: true } sebagai failsafe tambahan
+);
 
 console.log('[BirthdayQuest] Menunggu login...');
-console.log(
-  '[BirthdayQuest] Tahap X+1: Café map + NPC Arya + locked door aktif ✓'
-);
-console.log(
-  '[BirthdayQuest] Tahap X+2: Garden map + NPC Kucing & Hamster aktif ✓'
-);
