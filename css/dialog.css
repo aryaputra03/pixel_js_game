@@ -1,0 +1,230 @@
+/* ============================================
+   dialog.css — Dialog Box Styling
+   Birthday Quest RPG · Tahap 6
+============================================ */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* ============================================
+   DIALOG BOX — container utama
+============================================ */
+#dialog-box {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: min(480px, 100%); /* maks selebar canvas */
+  min-height: 120px; /* Dipertinggi sedikit untuk akomodasi font 8px */
+
+  background: #0e0e1a;
+  border-top: 3px solid #5a5aff;
+  border-left: 3px solid #5a5aff;
+  border-right: 3px solid #5a5aff;
+  border-radius: 6px 6px 0 0;
+
+  box-shadow:
+    0 -4px 20px rgba(90, 90, 255, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  padding: 0 0 8px;
+  z-index: 50;
+  pointer-events: auto;
+
+  animation: dialogSlideIn 0.2s ease-out both;
+}
+
+@keyframes dialogSlideIn {
+  from {
+    transform: translateX(-50%) translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+#dialog-box.closing {
+  animation: dialogSlideOut 0.15s ease-in both;
+}
+
+@keyframes dialogSlideOut {
+  from {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-50%) translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* ============================================
+   DIALOG HEADER — nama speaker
+============================================ */
+#dialog-header {
+  padding: 6px 14px 4px;
+  border-bottom: 1px solid rgba(90, 90, 255, 0.3);
+  margin-bottom: 6px;
+}
+
+#dialog-speaker {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; /* Tetap aman di 8px asli */
+  color: #7b7bff;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ============================================
+   DIALOG BODY — teks + arrow indikator
+============================================ */
+#dialog-body {
+  position: relative;
+  padding: 0 14px;
+  min-height: 48px;
+}
+
+#dialog-text {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; /* Tetap aman di 8px asli */
+  line-height: 1.8;
+  color: #e8e8f0;
+  margin: 0;
+  word-break: break-word;
+}
+
+#dialog-arrow {
+  position: absolute;
+  right: 14px;
+  bottom: 0;
+  font-size: 8px;
+  color: #7b7bff;
+  animation: arrowBlink 0.7s step-end infinite;
+  display: none;
+}
+
+@keyframes arrowBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ============================================
+   DIALOG CHOICES — pilihan jawaban
+============================================ */
+#dialog-choices {
+  padding: 6px 14px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.choice-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; /* PERBAIKAN: dari 7px ke 8px */
+  color: #c8c8e8;
+  background: rgba(90, 90, 255, 0.1);
+  border: 1px solid rgba(90, 90, 255, 0.4);
+  border-radius: 3px;
+  padding: 7px 10px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.1s,
+    color 0.1s,
+    border-color 0.1s;
+
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.choice-btn::before {
+  content: '▷';
+  color: #5a5aff;
+  font-size: 8px; /* PERBAIKAN: dari 6px ke 8px */
+  flex-shrink: 0;
+}
+
+.choice-btn:hover,
+.choice-btn:focus {
+  background: rgba(90, 90, 255, 0.25);
+  color: #ffffff;
+  border-color: #7b7bff;
+  outline: none;
+}
+
+.choice-btn:active {
+  background: rgba(90, 90, 255, 0.4);
+}
+
+/* ============================================
+   DIALOG HINT — petunjuk skip
+============================================ */
+#dialog-hint {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; /* PERBAIKAN: dari 6px ke 8px */
+  color: rgba(255, 255, 255, 0.2);
+  text-align: right;
+  padding: 4px 14px 0;
+}
+
+/* ============================================
+   MOBILE RESPONSIVE
+============================================ */
+@media (hover: none) and (pointer: coarse) {
+  #dialog-box {
+    bottom: 120px;
+    border-radius: 6px;
+    border: 3px solid #5a5aff;
+    width: calc(100% - 16px);
+    left: 8px;
+    transform: none;
+  }
+
+  @keyframes dialogSlideIn {
+    from {
+      transform: translateY(40px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  #dialog-text {
+    font-size: 8px; /* PERBAIKAN: Kunci di 8px agar tidak blur di HP */
+    line-height: 2;
+  }
+
+  #dialog-speaker {
+    font-size: 8px; /* PERBAIKAN: Kunci di 8px */
+  }
+
+  .choice-btn {
+    font-size: 8px; /* PERBAIKAN: Kunci di 8px */
+    padding: 9px 10px;
+  }
+}
+
+/* Landscape HP */
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) {
+  #dialog-box {
+    bottom: 90px;
+    min-height: 90px;
+  }
+
+  #dialog-text {
+    font-size: 8px; /* PERBAIKAN: Tetap gunakan 8px */
+  }
+}

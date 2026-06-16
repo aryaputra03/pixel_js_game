@@ -1,0 +1,15 @@
+# Mengabaikan folder dependency dan hasil build
+node_modules/
+dist/
+build/
+coverage/
+
+# Mengabaikan file konfigurasi sensitif atau otomatis
+.env
+.env.*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Mengabaikan folder dokumentasi git
+.git/

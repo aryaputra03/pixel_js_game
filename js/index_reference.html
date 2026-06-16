@@ -1,0 +1,147 @@
+<!--
+============================================
+index_reference.html
+Birthday Quest RPG — Referensi struktur DOM
+
+CARA PAKAI:
+File ini BUKAN pengganti index.html-mu yang sudah ada.
+Ini referensi elemen-elemen BARU yang perlu ditambahkan
+supaya mobile responsive + analog stick + anti-blur berfungsi.
+
+3 ELEMEN BARU yang wajib ditambahkan ke index.html-mu:
+  1. #orientation-overlay  → letakkan di awal <body>, sebelum #game-canvas
+  2. #analog-stick + #analog-knob → letakkan di dalam #dpad-container,
+     SEJAJAR dengan #dpad yang sudah ada (jangan dihapus, hanya disembunyikan via CSS)
+  3. Tidak ada perubahan pada <head> kecuali pastikan viewport meta tag
+     sudah benar (lihat di bawah)
+
+Elemen lain (debug-panel, dialog-box, hud, dll) TETAP SAMA seperti sebelumnya.
+============================================
+-->
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+
+    <!--
+    PENTING: viewport meta tag ini WAJIB ada dan PERSIS seperti ini.
+    - width=device-width        → ikuti lebar layar asli device
+    - initial-scale=1.0         → jangan auto-zoom saat load
+    - maximum-scale=1.0         → cegah pinch-zoom yang merusak layout game
+    - user-scalable=no          → cegah zoom tak sengaja saat main
+    - viewport-fit=cover        → penting untuk HP dengan notch (iPhone dll)
+                                   agar game mengisi penuh termasuk area notch
+  -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+
+    <title>Birthday Quest RPG</title>
+
+    <link rel="stylesheet" href="main.css" />
+    <link rel="stylesheet" href="hud.css" />
+    <link rel="stylesheet" href="dialog.css" />
+  </head>
+  <body>
+    <!-- ════════════════════════════════════════════
+       ORIENTATION OVERLAY                          ← ELEMEN BARU [1]
+       Tampil otomatis (via JS) saat HP dalam mode
+       portrait. Game ini didesain landscape.
+       ════════════════════════════════════════════ -->
+    <div id="orientation-overlay" class="hidden">
+      <div class="rotate-icon">📱</div>
+      <div class="rotate-title">PUTAR HP-MU</div>
+      <div class="rotate-sub">
+        Birthday Quest RPG dimainkan dalam mode landscape (mendatar). Putar
+        HP-mu untuk melanjutkan bermain.
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════
+       GAME CANVAS — tidak berubah dari sebelumnya
+       ════════════════════════════════════════════ -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- ════════════════════════════════════════════
+       UI OVERLAY — HUD, notif, dialog (tidak berubah)
+       ════════════════════════════════════════════ -->
+    <div id="ui-overlay">
+      <!-- Debug panel -->
+      <div id="debug-panel">
+        <span id="debug-fps">FPS: 0</span>
+        <span id="debug-phase">Phase: -</span>
+        <span id="debug-keys">Keys: none</span>
+      </div>
+
+      <!-- HUD quest -->
+      <div id="hud" class="hidden">
+        <div id="hud-quest">
+          <div id="hud-quest-label">QUEST</div>
+          <div id="hud-quest-title">-</div>
+          <div id="hud-progress-bar">
+            <div id="hud-progress-fill"></div>
+          </div>
+          <div id="hud-progress-text">0 / 0</div>
+        </div>
+      </div>
+
+      <!-- Notifikasi pop-up -->
+      <div id="notif" class="hidden">
+        <span id="notif-icon"></span>
+        <span id="notif-text"></span>
+      </div>
+
+      <!-- Fade overlay (cutscene ending) -->
+      <div id="fade-overlay"></div>
+
+      <!-- Dialog box -->
+      <div id="dialog-box" class="hidden">
+        <div id="dialog-header">
+          <span id="dialog-speaker"></span>
+        </div>
+        <div id="dialog-body">
+          <p id="dialog-text"></p>
+          <span id="dialog-arrow">▼</span>
+        </div>
+        <div id="dialog-choices"></div>
+        <div id="dialog-hint"></div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════
+       VIRTUAL CONTROLS — D-PAD + ANALOG STICK + ACTION
+       ════════════════════════════════════════════ -->
+    <div id="dpad-container">
+      <!-- D-PAD LAMA — tetap ada di DOM untuk device yang
+         lebih nyaman pakai tombol (mis. portrait/tablet),
+         tapi DISEMBUNYIKAN via CSS saat landscape mobile
+         (lihat main.css: @media landscape → #dpad { display:none }) -->
+      <div id="dpad">
+        <button class="dpad-btn" id="btn-up" data-key="ArrowUp">▲</button>
+        <button class="dpad-btn" id="btn-left" data-key="ArrowLeft">◀</button>
+        <button class="dpad-btn" id="btn-right" data-key="ArrowRight">▶</button>
+        <button class="dpad-btn" id="btn-down" data-key="ArrowDown">▼</button>
+      </div>
+
+      <!-- ANALOG STICK — ELEMEN BARU [2]                ← BARU
+         Hanya tampil di mode landscape mobile (CSS media query).
+         Logic drag/touch ada di input.js → setupAnalogStick(). -->
+      <div id="analog-stick">
+        <div id="analog-knob"></div>
+      </div>
+
+      <!-- Tombol aksi — tidak berubah dari sebelumnya -->
+      <div id="action-buttons">
+        <button class="action-btn" id="btn-action" data-key="e">E</button>
+        <button class="action-btn" id="btn-skip" data-key=" ">SKIP</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════
+       SCRIPT ENTRY POINT — tidak berubah
+       ════════════════════════════════════════════ -->
+    <script type="module" src="main.js"></script>
+  </body>
+</html>

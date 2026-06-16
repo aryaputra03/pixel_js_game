@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <!--
+    DIUBAH: tambah viewport-fit=cover
+    Penting untuk HP dengan notch (iPhone dll) agar game
+    mengisi penuh layar termasuk area notch saat landscape.
+  -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <title>Birthday Quest 🎂</title>
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/dialog.css" />
+    <link rel="stylesheet" href="css/hud.css" />
+  </head>
+  <body>
+    <!-- ============================================
+       ORIENTATION OVERLAY — "Putar HP-mu"          ← BARU
+       Tampil otomatis (via JS di main.js) saat HP
+       dalam mode portrait. Game ini didesain landscape.
+       Diletakkan SEBELUM #game-canvas agar z-index
+       paling atas dan menutupi seluruh game saat aktif.
+  ============================================ -->
+    <div id="orientation-overlay" class="hidden">
+      <div class="rotate-icon">📱</div>
+      <div class="rotate-title">PUTAR HP-MU</div>
+      <div class="rotate-sub">
+        Birthday Quest dimainkan dalam mode landscape (mendatar). Putar HP-mu
+        untuk melanjutkan bermain.
+      </div>
+    </div>
+
+    <!-- ============================================
+       GAME CANVAS — semua visual game digambar di sini
+  ============================================ -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- ============================================
+       UI OVERLAY — semua elemen HTML di atas canvas
+       (dialog, HUD, notifikasi, dll)
+       Akan diisi di tahap-tahap berikutnya
+  ============================================ -->
+    <div id="ui-overlay">
+      <!-- HUD — Tahap 7 -->
+      <div id="hud" class="hidden">
+        <div id="hud-quest">
+          <span id="hud-quest-label">QUEST</span>
+          <span id="hud-quest-title">—</span>
+          <div id="hud-progress-bar">
+            <div id="hud-progress-fill"></div>
+          </div>
+          <span id="hud-progress-text">0 / 0</span>
+        </div>
+      </div>
+
+      <!-- Dialog Box — Tahap 6 -->
+      <div id="dialog-box" class="hidden">
+        <!-- Header: nama speaker -->
+        <div id="dialog-header">
+          <span id="dialog-speaker"></span>
+        </div>
+
+        <!-- Teks dialog — typewriter mengisi ke sini -->
+        <div id="dialog-body">
+          <p id="dialog-text"></p>
+          <!-- Indikator "lanjut" — berkedip saat teks selesai -->
+          <span id="dialog-arrow">&#9660;</span>
+        </div>
+
+        <!-- Pilihan jawaban — muncul setelah teks selesai -->
+        <div id="dialog-choices"></div>
+
+        <!-- Hint skip — desktop: Spasi, mobile: tap OK -->
+        <div id="dialog-hint"></div>
+      </div>
+
+      <!-- Notifikasi pop-up — Tahap 7 -->
+      <div id="notif" class="hidden">
+        <span id="notif-icon"></span>
+        <span id="notif-text"></span>
+      </div>
+
+      <!-- Fade overlay — untuk transisi cutscene ending -->
+      <div id="fade-overlay"></div>
+
+      <!-- DEBUG panel — tampil saat development, hidden saat production -->
+      <div id="debug-panel">
+        <span id="debug-fps">FPS: --</span>
+        <span id="debug-phase">Phase: --</span>
+        <span id="debug-keys">Keys: --</span>
+      </div>
+    </div>
+
+    <!-- ============================================
+       VIRTUAL D-PAD + ANALOG STICK — kontrol touch mobile
+       D-pad lama tetap ada di DOM (dipakai di portrait/tablet),
+       Analog stick BARU khusus muncul di mode landscape mobile
+       (lihat media query di css/main.css).
+  ============================================ -->
+    <div id="dpad-container">
+      <!-- Tombol arah (lama) -->
+      <div id="dpad">
+        <button class="dpad-btn" id="btn-up" data-key="ArrowUp">▲</button>
+        <button class="dpad-btn" id="btn-left" data-key="ArrowLeft">◀</button>
+        <button class="dpad-btn" id="btn-right" data-key="ArrowRight">▶</button>
+        <button class="dpad-btn" id="btn-down" data-key="ArrowDown">▼</button>
+      </div>
+
+      <!-- ANALOG STICK — ELEMEN BARU                  ← BARU
+         Hanya tampil di mode landscape mobile (CSS media query).
+         Logic drag/touch ada di js/input.js → setupAnalogStick(). -->
+      <div id="analog-stick">
+        <div id="analog-knob"></div>
+      </div>
+
+      <!-- Tombol aksi -->
+      <div id="action-buttons">
+        <button class="action-btn" id="btn-action" data-key="e">E</button>
+        <button class="action-btn" id="btn-skip" data-key=" ">OK</button>
+      </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>

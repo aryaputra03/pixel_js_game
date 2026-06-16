@@ -1,0 +1,194 @@
+/* ============================================
+   hud.css — HUD, Notifikasi, Fade Overlay
+   Birthday Quest RPG · Tahap 7
+============================================ */
+
+/* ============================================
+   HUD — pojok kiri atas
+============================================ */
+#hud {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 30;
+  pointer-events: none;
+}
+
+#hud-quest {
+  display: flex;
+  flex-direction: column;
+  gap: 5px; /* Ditambah sedikit jaraknya */
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(90, 90, 255, 0.4);
+  border-radius: 5px;
+  padding: 8px 12px;
+  min-width: 160px; /* Diperlebar dari 140px agar teks 8px muat */
+  backdrop-filter: blur(4px);
+}
+
+/* Label "QUEST" kecil di atas */
+#hud-quest-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; /* PERBAIKAN: dari 5px ke 8px */
+  color: #5a5aff;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Judul quest aktif */
+#hud-quest-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; /* PERBAIKAN: dari 6px ke 8px */
+  color: #e8e8f0;
+  line-height: 1.6;
+  word-break: break-word;
+  max-width: 150px;
+}
+
+/* Progress bar container */
+#hud-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 2px;
+}
+
+/* Progress fill */
+#hud-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #5a5aff, #a06bff);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+/* Teks "1 / 3" di bawah bar */
+#hud-progress-text {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; /* PERBAIKAN: dari 5px ke 8px */
+  color: rgba(255, 255, 255, 0.4);
+  text-align: right;
+}
+
+/* ============================================
+   NOTIFIKASI POP-UP
+============================================ */
+#notif {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  z-index: 60;
+  pointer-events: none;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  background: rgba(10, 10, 30, 0.92);
+  border: 1px solid rgba(90, 90, 255, 0.6);
+  border-radius: 6px;
+  padding: 8px 14px;
+
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; /* PERBAIKAN: dari 7px ke 8px */
+  color: #e8e8ff;
+  white-space: nowrap;
+
+  box-shadow: 0 4px 20px rgba(90, 90, 255, 0.3);
+
+  opacity: 0;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+#notif.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+#notif.hidden {
+  display: flex !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#notif-icon {
+  font-size: 12px;
+  line-height: 1;
+}
+
+/* Variant warna */
+#notif.notif-quest-new {
+  border-color: rgba(100, 200, 100, 0.6);
+  box-shadow: 0 4px 20px rgba(100, 200, 100, 0.25);
+}
+#notif.notif-quest-new #notif-icon::before {
+  content: '⚔️';
+}
+
+#notif.notif-quest-done {
+  border-color: rgba(255, 200, 50, 0.6);
+  box-shadow: 0 4px 20px rgba(255, 200, 50, 0.25);
+}
+#notif.notif-quest-done #notif-icon::before {
+  content: '✨';
+}
+
+#notif.notif-item {
+  border-color: rgba(180, 100, 255, 0.6);
+  box-shadow: 0 4px 20px rgba(180, 100, 255, 0.25);
+}
+#notif.notif-item #notif-icon::before {
+  content: '📦';
+}
+
+/* ============================================
+   FADE OVERLAY
+============================================ */
+#fade-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 100;
+  transition: opacity 0.8s ease;
+}
+
+#fade-overlay.fade-in {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ============================================
+   MOBILE RESPONSIVE
+============================================ */
+@media (hover: none) and (pointer: coarse) {
+  #hud {
+    top: 8px;
+    left: 8px;
+  }
+
+  #hud-quest {
+    padding: 6px 10px;
+    min-width: 140px;
+  }
+
+  #hud-quest-title {
+    font-size: 8px; /* PERBAIKAN: Kunci di 8px */
+    max-width: 130px;
+  }
+
+  #notif {
+    font-size: 8px; /* PERBAIKAN: Kunci di 8px */
+    padding: 7px 12px;
+    top: 10px;
+    max-width: calc(100% - 32px);
+    white-space: normal;
+    text-align: center;
+  }
+}
