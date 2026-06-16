@@ -688,6 +688,10 @@ function loop(now) {
 // INIT
 // ============================================
 
+// ============================================
+// INIT — dipanggil SETELAH login berhasil
+// ============================================
+
 async function init() {
   try {
     await loadSprites();
@@ -698,8 +702,35 @@ async function init() {
     requestAnimationFrame(loop);
   }
 }
-init();
 
+// ============================================
+// LOGIN GATE                                             ← BARU
+//
+// main.js TIDAK langsung memanggil init().
+// Sebaliknya, ia menunggu event 'gameUnlocked'
+// yang di-dispatch oleh inline script di index.html
+// setelah player berhasil memasukkan password yang benar.
+//
+// Kenapa event bukan export/import?
+//   - Login script adalah inline <script> (non-module)
+//     karena harus jalan SEBELUM module dimuat.
+//   - window.dispatchEvent / window.addEventListener
+//     adalah satu-satunya bridge yang andal antara
+//     inline script dan ES module.
+// ============================================
+
+window.addEventListener(
+  'gameUnlocked',
+  function onGameUnlocked() {
+    // Hapus listener agar tidak bisa di-trigger ulang
+    window.removeEventListener('gameUnlocked', onGameUnlocked);
+    console.log('[BirthdayQuest] Login sukses — memulai game...');
+    init();
+  },
+  { once: true }
+); // { once: true } sebagai failsafe tambahan
+
+console.log('[BirthdayQuest] Menunggu login...');
 console.log(
   '[BirthdayQuest] Tahap X+1: Café map + NPC Arya + locked door aktif ✓'
 );

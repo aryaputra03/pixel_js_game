@@ -1,0 +1,489 @@
+/* ============================================
+   login.css — Halaman Login / Password Gate
+   Birthday Quest RPG
+   
+   Overlay penuh di atas segalanya.
+   Gaya: pixel art RPG title screen —
+   latar langit malam bertabur bintang,
+   kotak dialog bergaya retro, font Press Start 2P.
+   
+   Dihilangkan saat password benar:
+     #login-screen.hidden { display: none !important; }
+============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* ============================================
+   CONTAINER UTAMA — menutupi seluruh layar
+============================================ */
+#login-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 300; /* lebih tinggi dari orientation overlay (200) */
+
+  /* Latar langit malam gradient */
+  background:
+    radial-gradient(
+      ellipse at 20% 30%,
+      rgba(30, 10, 80, 0.9) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse at 80% 70%,
+      rgba(10, 30, 70, 0.8) 0%,
+      transparent 60%
+    ),
+    linear-gradient(160deg, #04001a 0%, #0a0430 40%, #0d0820 100%);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+
+  font-family: 'Press Start 2P', monospace;
+  overflow: hidden;
+  transition: opacity 0.6s ease;
+}
+
+#login-screen.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ============================================
+   BINTANG-BINTANG LATAR
+   Dibuat via CSS — tiga layer dengan ukuran berbeda
+   untuk kedalaman visual
+============================================ */
+#login-screen::before,
+#login-screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Layer bintang kecil */
+#login-screen::before {
+  background-image:
+    radial-gradient(1px 1px at 5% 8%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 12% 20%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 22% 5%, #ddf 100%, transparent),
+    radial-gradient(1px 1px at 35% 15%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 48% 3%, #eef 100%, transparent),
+    radial-gradient(1px 1px at 58% 25%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 67% 9%, #ddf 100%, transparent),
+    radial-gradient(1px 1px at 75% 18%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 88% 6%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 93% 22%, #eef 100%, transparent),
+    radial-gradient(1px 1px at 3% 45%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 17% 60%, #ddf 100%, transparent),
+    radial-gradient(1px 1px at 28% 38%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 42% 52%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 55% 42%, #eef 100%, transparent),
+    radial-gradient(1px 1px at 63% 58%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 78% 35%, #ddf 100%, transparent),
+    radial-gradient(1px 1px at 85% 48%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 96% 40%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 8% 75%, #eef 100%, transparent),
+    radial-gradient(1px 1px at 20% 88%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 32% 70%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 45% 82%, #ddf 100%, transparent),
+    radial-gradient(1px 1px at 60% 78%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 72% 92%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 83% 68%, #eef 100%, transparent),
+    radial-gradient(1px 1px at 91% 85%, #fff 100%, transparent);
+  opacity: 0.7;
+  animation: starTwinkle 4s ease-in-out infinite alternate;
+}
+
+/* Layer bintang besar + planet kecil */
+#login-screen::after {
+  background-image:
+    radial-gradient(2px 2px at 10% 12%, #fffbe0 100%, transparent),
+    radial-gradient(2px 2px at 30% 28%, #fff 100%, transparent),
+    radial-gradient(2px 2px at 52% 8%, #fffbe0 100%, transparent),
+    radial-gradient(2px 2px at 70% 20%, #fff 100%, transparent),
+    radial-gradient(2px 2px at 90% 15%, #fffbe0 100%, transparent),
+    radial-gradient(3px 3px at 15% 65%, #ffeebb 100%, transparent),
+    radial-gradient(3px 3px at 50% 80%, #fff 100%, transparent),
+    radial-gradient(3px 3px at 82% 55%, #ffeebb 100%, transparent);
+  opacity: 0.5;
+  animation: starTwinkle 6s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes starTwinkle {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 0.9;
+  }
+}
+
+/* ============================================
+   JUDUL GAME — "BIRTHDAY QUEST"
+============================================ */
+.login-title-wrap {
+  position: relative;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.login-title {
+  font-size: clamp(14px, 4vw, 22px);
+  color: #ffe066;
+  letter-spacing: 3px;
+  line-height: 1.5;
+
+  /* Efek glow emas */
+  text-shadow:
+    0 0 8px rgba(255, 200, 50, 0.9),
+    0 0 20px rgba(255, 160, 20, 0.6),
+    0 0 40px rgba(255, 100, 0, 0.3),
+    2px 2px 0 rgba(0, 0, 0, 0.8);
+
+  animation: titlePulse 2.4s ease-in-out infinite;
+}
+
+@keyframes titlePulse {
+  0%,
+  100% {
+    text-shadow:
+      0 0 8px rgba(255, 200, 50, 0.9),
+      0 0 20px rgba(255, 160, 20, 0.6),
+      0 0 40px rgba(255, 100, 0, 0.3),
+      2px 2px 0 rgba(0, 0, 0, 0.8);
+  }
+  50% {
+    text-shadow:
+      0 0 12px rgba(255, 220, 80, 1),
+      0 0 30px rgba(255, 180, 30, 0.8),
+      0 0 60px rgba(255, 120, 0, 0.5),
+      2px 2px 0 rgba(0, 0, 0, 0.8);
+  }
+}
+
+.login-subtitle {
+  font-size: clamp(6px, 1.5vw, 9px);
+  color: rgba(200, 180, 255, 0.7);
+  letter-spacing: 4px;
+  margin-top: 6px;
+  text-shadow: 0 0 10px rgba(160, 120, 255, 0.6);
+}
+
+/* ============================================
+   ICON / CAKE PIXEL ART (emoji placeholder)
+============================================ */
+.login-cake {
+  font-size: clamp(28px, 6vw, 44px);
+  text-align: center;
+  margin-bottom: 4px;
+  filter: drop-shadow(0 0 12px rgba(255, 160, 60, 0.7));
+  animation: cakeBounce 1.8s ease-in-out infinite;
+}
+
+@keyframes cakeBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* ============================================
+   KOTAK DIALOG PASSWORD — gaya RPG
+============================================ */
+.login-box {
+  position: relative;
+  background: rgba(8, 4, 28, 0.92);
+  border: 2px solid #5a5aff;
+  border-radius: 6px;
+  padding: 24px 28px 20px;
+  width: min(400px, 88vw);
+  margin-top: 12px;
+
+  box-shadow:
+    0 0 0 1px rgba(90, 90, 255, 0.2),
+    0 0 20px rgba(90, 90, 255, 0.3),
+    0 0 60px rgba(90, 90, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Garis dekoratif pojok */
+.login-box::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid rgba(90, 90, 255, 0.6);
+  border-left: 2px solid rgba(90, 90, 255, 0.6);
+}
+.login-box::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 10px;
+  height: 10px;
+  border-bottom: 2px solid rgba(90, 90, 255, 0.6);
+  border-right: 2px solid rgba(90, 90, 255, 0.6);
+}
+
+/* ============================================
+   SOAL MATEMATIKA
+============================================ */
+.login-instruction {
+  font-size: clamp(6px, 1.4vw, 8px);
+  color: rgba(200, 200, 255, 0.65);
+  text-align: center;
+  margin-bottom: 14px;
+  letter-spacing: 1px;
+  line-height: 2;
+}
+
+.login-question-label {
+  font-size: clamp(6px, 1.2vw, 7px);
+  color: #7b7bff;
+  text-align: center;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+/* Kotak soal dengan border berbeda */
+.login-question-box {
+  background: rgba(20, 10, 60, 0.8);
+  border: 1px solid rgba(90, 90, 255, 0.35);
+  border-radius: 4px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.login-question-text {
+  font-size: clamp(8px, 2vw, 12px);
+  color: #ffe066;
+  line-height: 2;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(255, 200, 60, 0.5);
+}
+
+.login-question-hint {
+  font-size: clamp(5px, 1vw, 6px);
+  color: rgba(255, 255, 200, 0.4);
+  margin-top: 6px;
+  line-height: 1.8;
+}
+
+/* ============================================
+   INPUT PASSWORD
+============================================ */
+.login-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.login-input-label {
+  font-size: clamp(6px, 1.2vw, 7px);
+  color: #a0a0ff;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 1px;
+}
+
+#login-input {
+  flex: 1;
+  background: rgba(10, 8, 40, 0.9);
+  border: 1px solid rgba(90, 90, 255, 0.5);
+  border-radius: 3px;
+  color: #e8e8ff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(10px, 2.5vw, 14px);
+  padding: 8px 12px;
+  text-align: center;
+  letter-spacing: 4px;
+  outline: none;
+  width: 100%;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+
+  /* Hilangkan angka spinner */
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+#login-input::-webkit-outer-spin-button,
+#login-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+#login-input:focus {
+  border-color: #7b7bff;
+  box-shadow: 0 0 10px rgba(90, 90, 255, 0.4);
+}
+
+#login-input.input-error {
+  border-color: #ff5555;
+  box-shadow: 0 0 10px rgba(255, 50, 50, 0.4);
+  animation: shakeInput 0.35s ease;
+}
+
+#login-input.input-success {
+  border-color: #55ff88;
+  box-shadow: 0 0 14px rgba(50, 255, 100, 0.5);
+}
+
+@keyframes shakeInput {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+/* ============================================
+   TOMBOL MASUK
+============================================ */
+#login-btn {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px 16px;
+
+  background: rgba(40, 30, 100, 0.8);
+  border: 2px solid #5a5aff;
+  border-radius: 4px;
+  color: #c8c8ff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(7px, 1.6vw, 9px);
+  letter-spacing: 2px;
+  cursor: pointer;
+  text-transform: uppercase;
+
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s,
+    transform 0.1s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#login-btn:hover {
+  background: rgba(70, 55, 180, 0.9);
+  color: #ffffff;
+  border-color: #8888ff;
+}
+
+#login-btn:active {
+  transform: scale(0.97);
+  background: rgba(90, 80, 200, 0.9);
+}
+
+#login-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   PESAN FEEDBACK (salah / benar)
+============================================ */
+#login-feedback {
+  min-height: 20px;
+  text-align: center;
+  font-size: clamp(6px, 1.2vw, 7px);
+  letter-spacing: 1px;
+  margin-top: 10px;
+  line-height: 2;
+  transition: opacity 0.2s;
+}
+
+#login-feedback.feedback-error {
+  color: #ff6666;
+  text-shadow: 0 0 8px rgba(255, 50, 50, 0.6);
+}
+
+#login-feedback.feedback-ok {
+  color: #66ff99;
+  text-shadow: 0 0 8px rgba(50, 255, 100, 0.6);
+}
+
+/* ============================================
+   FOOTER KECIL
+============================================ */
+.login-footer {
+  position: absolute;
+  bottom: 14px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: clamp(5px, 1vw, 6px);
+  color: rgba(255, 255, 255, 0.18);
+  letter-spacing: 2px;
+  pointer-events: none;
+}
+
+/* ============================================
+   MOBILE RESPONSIVE
+============================================ */
+@media (max-width: 400px) {
+  .login-box {
+    padding: 18px 16px 16px;
+  }
+  .login-title {
+    font-size: 12px;
+  }
+}
+
+@media (max-height: 420px) and (orientation: landscape) {
+  /* Landscape HP kecil — kompakkan layout */
+  .login-cake {
+    font-size: 24px;
+    margin-bottom: 0;
+  }
+  .login-title {
+    font-size: 11px;
+  }
+  .login-subtitle {
+    display: none;
+  }
+  .login-box {
+    padding: 12px 18px;
+    margin-top: 6px;
+  }
+  .login-question-box {
+    padding: 8px 10px;
+    margin-bottom: 10px;
+  }
+  .login-question-text {
+    font-size: 9px;
+  }
+  #login-input {
+    padding: 6px 10px;
+  }
+  #login-btn {
+    padding: 8px 12px;
+    margin-top: 8px;
+  }
+}

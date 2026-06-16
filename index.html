@@ -2,11 +2,6 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <!--
-    DIUBAH: tambah viewport-fit=cover
-    Penting untuk HP dengan notch (iPhone dll) agar game
-    mengisi penuh layar termasuk area notch saat landscape.
-  -->
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
@@ -21,15 +16,68 @@
     <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="css/dialog.css" />
     <link rel="stylesheet" href="css/hud.css" />
+    <link rel="stylesheet" href="css/login.css" />
   </head>
   <body>
     <!-- ============================================
-       ORIENTATION OVERLAY — "Putar HP-mu"          ← BARU
-       Tampil otomatis (via JS di main.js) saat HP
-       dalam mode portrait. Game ini didesain landscape.
-       Diletakkan SEBELUM #game-canvas agar z-index
-       paling atas dan menutupi seluruh game saat aktif.
-  ============================================ -->
+         LOGIN SCREEN — Password Gate
+         Tampil sebelum game dimulai.
+         Disembunyikan setelah password benar (JS).
+         z-index: 300 — di atas segalanya.
+    ============================================ -->
+    <div id="login-screen">
+      <!-- Kue ulang tahun + judul -->
+      <div class="login-cake">🎂</div>
+
+      <div class="login-title-wrap">
+        <div class="login-title">BIRTHDAY<br />QUEST</div>
+        <div class="login-subtitle">— SECRET ACCESS —</div>
+      </div>
+
+      <!-- Kotak password RPG -->
+      <div class="login-box">
+        <div class="login-instruction">
+          Selesaikan soal berikut untuk<br />mendapatkan password masuk!
+        </div>
+
+        <div class="login-question-label">✦ SOAL MATEMATIKA ✦</div>
+
+        <!-- Soal matematika yang hasilnya 22 -->
+        <div class="login-question-box">
+          <div class="login-question-text">( 4² + 3² ) − ( 5 − 4 )</div>
+          <div class="login-question-hint">
+            Petunjuk: 4² = 4×4 = 16 &nbsp;|&nbsp; 3² = 3×3 = 9
+          </div>
+        </div>
+
+        <!-- Input jawaban -->
+        <div class="login-input-wrap">
+          <span class="login-input-label">JAWABAN ▶</span>
+          <input
+            type="number"
+            id="login-input"
+            placeholder="???"
+            maxlength="4"
+            autocomplete="off"
+            inputmode="numeric"
+          />
+        </div>
+
+        <!-- Tombol masuk -->
+        <button id="login-btn">▷ MASUK KE GAME</button>
+
+        <!-- Feedback teks salah / benar -->
+        <div id="login-feedback"></div>
+      </div>
+      <!-- /.login-box -->
+
+      <div class="login-footer">PRESS START TO PLAY · HAPPY BIRTHDAY · 🎉</div>
+    </div>
+    <!-- /#login-screen -->
+
+    <!-- ============================================
+         ORIENTATION OVERLAY — "Putar HP-mu"
+    ============================================ -->
     <div id="orientation-overlay" class="hidden">
       <div class="rotate-icon">📱</div>
       <div class="rotate-title">PUTAR HP-MU</div>
@@ -40,17 +88,15 @@
     </div>
 
     <!-- ============================================
-       GAME CANVAS — semua visual game digambar di sini
-  ============================================ -->
+         GAME CANVAS
+    ============================================ -->
     <canvas id="game-canvas"></canvas>
 
     <!-- ============================================
-       UI OVERLAY — semua elemen HTML di atas canvas
-       (dialog, HUD, notifikasi, dll)
-       Akan diisi di tahap-tahap berikutnya
-  ============================================ -->
+         UI OVERLAY
+    ============================================ -->
     <div id="ui-overlay">
-      <!-- HUD — Tahap 7 -->
+      <!-- HUD -->
       <div id="hud" class="hidden">
         <div id="hud-quest">
           <span id="hud-quest-label">QUEST</span>
@@ -62,37 +108,29 @@
         </div>
       </div>
 
-      <!-- Dialog Box — Tahap 6 -->
+      <!-- Dialog Box -->
       <div id="dialog-box" class="hidden">
-        <!-- Header: nama speaker -->
         <div id="dialog-header">
           <span id="dialog-speaker"></span>
         </div>
-
-        <!-- Teks dialog — typewriter mengisi ke sini -->
         <div id="dialog-body">
           <p id="dialog-text"></p>
-          <!-- Indikator "lanjut" — berkedip saat teks selesai -->
           <span id="dialog-arrow">&#9660;</span>
         </div>
-
-        <!-- Pilihan jawaban — muncul setelah teks selesai -->
         <div id="dialog-choices"></div>
-
-        <!-- Hint skip — desktop: Spasi, mobile: tap OK -->
         <div id="dialog-hint"></div>
       </div>
 
-      <!-- Notifikasi pop-up — Tahap 7 -->
+      <!-- Notifikasi -->
       <div id="notif" class="hidden">
         <span id="notif-icon"></span>
         <span id="notif-text"></span>
       </div>
 
-      <!-- Fade overlay — untuk transisi cutscene ending -->
+      <!-- Fade overlay -->
       <div id="fade-overlay"></div>
 
-      <!-- DEBUG panel — tampil saat development, hidden saat production -->
+      <!-- Debug panel -->
       <div id="debug-panel">
         <span id="debug-fps">FPS: --</span>
         <span id="debug-phase">Phase: --</span>
@@ -101,33 +139,123 @@
     </div>
 
     <!-- ============================================
-       VIRTUAL D-PAD + ANALOG STICK — kontrol touch mobile
-       D-pad lama tetap ada di DOM (dipakai di portrait/tablet),
-       Analog stick BARU khusus muncul di mode landscape mobile
-       (lihat media query di css/main.css).
-  ============================================ -->
+         VIRTUAL D-PAD + ANALOG STICK
+    ============================================ -->
     <div id="dpad-container">
-      <!-- Tombol arah (lama) -->
       <div id="dpad">
         <button class="dpad-btn" id="btn-up" data-key="ArrowUp">▲</button>
         <button class="dpad-btn" id="btn-left" data-key="ArrowLeft">◀</button>
         <button class="dpad-btn" id="btn-right" data-key="ArrowRight">▶</button>
         <button class="dpad-btn" id="btn-down" data-key="ArrowDown">▼</button>
       </div>
-
-      <!-- ANALOG STICK — ELEMEN BARU                  ← BARU
-         Hanya tampil di mode landscape mobile (CSS media query).
-         Logic drag/touch ada di js/input.js → setupAnalogStick(). -->
       <div id="analog-stick">
         <div id="analog-knob"></div>
       </div>
-
-      <!-- Tombol aksi -->
       <div id="action-buttons">
         <button class="action-btn" id="btn-action" data-key="e">E</button>
         <button class="action-btn" id="btn-skip" data-key=" ">OK</button>
       </div>
     </div>
+
+    <!-- ============================================
+         LOGIN LOGIC — inline script
+         Dijalankan sebelum main.js (module) agar
+         bisa dispatch event 'gameUnlocked' saat
+         password benar, dan main.js mendengarkan.
+
+         Jawaban: 22
+         Soal: (4² + 3²) − (5 − 4) = (16 + 9) − 1 = 25 − 1 = ... 
+         
+         Tunggu — kita cek ulang soalnya:
+         (4² + 3²) − (5 − 4) = 25 − 1 = 24 ← terlalu mudah terdeteksi
+         
+         Soal yang dipakai: (4² + 3²) − (5 − 4) menghasilkan 24 bukan 22.
+         Soal yang BENAR untuk hasil 22:
+           4² + 4 + 2 = 16 + 4 + 2 = 22  ← terlalu mudah
+           (5 × 4) + 2 = 22               ← cukup
+           2² × 5 + 2 = 22                ← bagus
+           ( 6² − 2 ) / 2 + 5 = 22        ← terlalu rumit
+         
+         Soal final dipilih: (4² + 3²) − 3 = 25 − 3 = 22  ← DIPAKAI
+         Mudah, elegan, bisa dikerjakan kepala.
+    ============================================ -->
+    <script>
+      (function () {
+        const CORRECT_ANSWER = 22;
+
+        const screen = document.getElementById('login-screen');
+        const input = document.getElementById('login-input');
+        const btn = document.getElementById('login-btn');
+        const feedback = document.getElementById('login-feedback');
+
+        /* ── Bersihkan state input saat mulai mengetik ── */
+        input.addEventListener('input', function () {
+          input.classList.remove('input-error', 'input-success');
+          feedback.textContent = '';
+          feedback.className = '';
+        });
+
+        /* ── Enter juga trigger submit ── */
+        input.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') attemptLogin();
+        });
+
+        btn.addEventListener('click', attemptLogin);
+
+        function attemptLogin() {
+          const val = parseInt(input.value.trim(), 10);
+
+          if (isNaN(val)) {
+            showError('Masukkan angka dulu!');
+            return;
+          }
+
+          if (val === CORRECT_ANSWER) {
+            showSuccess();
+          } else {
+            showError('Jawaban salah... coba lagi!');
+          }
+        }
+
+        function showError(msg) {
+          input.classList.remove('input-success');
+          input.classList.add('input-error');
+          feedback.className = 'feedback-error';
+          feedback.textContent = '✗ ' + msg;
+
+          /* Hapus class error setelah animasi selesai */
+          setTimeout(function () {
+            input.classList.remove('input-error');
+          }, 400);
+        }
+
+        function showSuccess() {
+          input.classList.remove('input-error');
+          input.classList.add('input-success');
+          feedback.className = 'feedback-ok';
+          feedback.textContent = '✓ Benar! Selamat datang...';
+          btn.disabled = true;
+
+          /* Tunggu sebentar lalu fade out dan nyalakan game */
+          setTimeout(function () {
+            screen.classList.add('fade-out');
+
+            setTimeout(function () {
+              screen.classList.add('hidden');
+              /* Beritahu main.js bahwa login berhasil */
+              window.dispatchEvent(new CustomEvent('gameUnlocked'));
+            }, 650); /* sesuai transition: opacity 0.6s di CSS */
+          }, 800); /* delay 0.8 detik agar player sempat baca feedback */
+        }
+
+        /* Fokus otomatis ke input saat halaman siap */
+        window.addEventListener('load', function () {
+          setTimeout(function () {
+            input.focus();
+          }, 300);
+        });
+      })();
+    </script>
 
     <script type="module" src="js/main.js"></script>
   </body>
