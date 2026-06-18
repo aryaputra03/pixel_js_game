@@ -42,17 +42,17 @@ function getCtx() {
  */
 function playTone(freq, dur, type = 'square', vol = 0.3, delay = 0) {
   try {
-    const ctx  = getCtx();
-    const osc  = ctx.createOscillator();
+    const ctx = getCtx();
+    const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
-    osc.type           = type;
+    osc.type = type;
     osc.frequency.value = freq;
 
     // Envelope: attack cepat, release sedikit agar tidak "klik"
     gain.gain.setValueAtTime(0, ctx.currentTime + delay);
     gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + delay + 0.005);
-    gain.gain.linearRampToValueAtTime(0,   ctx.currentTime + delay + dur);
+    gain.gain.linearRampToValueAtTime(0, ctx.currentTime + delay + dur);
 
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -69,7 +69,6 @@ function playTone(freq, dur, type = 'square', vol = 0.3, delay = 0) {
 // ============================================
 
 const SoundManager = {
-
   /**
    * typewriterTick()
    * Suara klik ringan saat typewriter mengetik satu karakter.
@@ -115,9 +114,9 @@ const SoundManager = {
    * Tiga nada naik — feel "ting ting ting!".
    */
   questNew() {
-    playTone(523, 0.1, 'square', 0.25, 0);     // C5
-    playTone(659, 0.1, 'square', 0.25, 0.1);   // E5
-    playTone(784, 0.2, 'square', 0.25, 0.2);   // G5
+    playTone(523, 0.1, 'square', 0.25, 0); // C5
+    playTone(659, 0.1, 'square', 0.25, 0.1); // E5
+    playTone(784, 0.2, 'square', 0.25, 0.2); // G5
   },
 
   /**
@@ -126,10 +125,10 @@ const SoundManager = {
    * Arpeggio naik + nada panjang di akhir.
    */
   questComplete() {
-    playTone(523, 0.08, 'square', 0.3, 0);     // C5
-    playTone(659, 0.08, 'square', 0.3, 0.08);  // E5
-    playTone(784, 0.08, 'square', 0.3, 0.16);  // G5
-    playTone(1047,0.25, 'square', 0.3, 0.24);  // C6 — nada panjang
+    playTone(523, 0.08, 'square', 0.3, 0); // C5
+    playTone(659, 0.08, 'square', 0.3, 0.08); // E5
+    playTone(784, 0.08, 'square', 0.3, 0.16); // G5
+    playTone(1047, 0.25, 'square', 0.3, 0.24); // C6 — nada panjang
   },
 
   /**
@@ -167,14 +166,14 @@ const SoundManager = {
   ending() {
     // Melodi sederhana — C major, feel hopeful
     const notes = [
-      [523, 0],    // C5
-      [587, 0.2],  // D5
-      [659, 0.4],  // E5
-      [698, 0.6],  // F5
-      [784, 0.8],  // G5
-      [659, 1.1],  // E5
-      [784, 1.4],  // G5
-      [1047,1.7],  // C6 — resolusi
+      [523, 0], // C5
+      [587, 0.2], // D5
+      [659, 0.4], // E5
+      [698, 0.6], // F5
+      [784, 0.8], // G5
+      [659, 1.1], // E5
+      [784, 1.4], // G5
+      [1047, 1.7], // C6 — resolusi
     ];
     notes.forEach(([freq, delay]) => {
       playTone(freq, 0.18, 'triangle', 0.2, delay);
@@ -190,6 +189,74 @@ const SoundManager = {
     playTone(880, 0.04, 'sine', 0.12);
   },
 
+  // ============================================
+  // BIRTHDAY MUSIC — file audio custom dari assets/
+  //
+  // Berbeda dari SFX di atas (yang procedural via Web Audio API),
+  // musik ulang tahun pakai elemen <audio> HTML karena ini file
+  // audio asli (mp3/wav), bukan nada yang di-generate.
+  //
+  // Cara pakai:
+  //   1. Taruh file audio di: assets/sounds/birthday.mp3
+  //      (boleh ganti nama file & path, sesuaikan BIRTHDAY_MUSIC_SRC)
+  //   2. playBirthdayMusic() dipanggil sekali saat masuk map café
+  //   3. stopBirthdayMusic() dipanggil saat keluar dari café
+  // ============================================
+
+  _birthdayAudio: null,
+
+  /**
+   * playBirthdayMusic()
+   * Mainkan musik ulang tahun, loop selama player ada di café.
+   * Lazy-load elemen audio agar tidak fetch file sebelum dibutuhkan.
+   */
+  playBirthdayMusic() {
+    try {
+      if (!this._birthdayAudio) {
+        this._birthdayAudio = new Audio(BIRTHDAY_MUSIC_SRC);
+        this._birthdayAudio.loop = true;
+        this._birthdayAudio.volume = 0.5;
+      }
+      // Reset ke awal setiap kali masuk café (feel seperti "disambut")
+      this._birthdayAudio.currentTime = 0;
+      const playPromise = this._birthdayAudio.play();
+      if (playPromise) {
+        playPromise.catch((err) => {
+          // Browser kadang blokir autoplay tanpa gesture — aman diabaikan
+          console.warn('[SoundManager] Birthday music blocked:', err.message);
+        });
+      }
+    } catch (e) {
+      console.warn('[SoundManager] Birthday music failed to load:', e);
+    }
+  },
+
+  /**
+   * stopBirthdayMusic()
+   * Hentikan musik ulang tahun — dipanggil saat player keluar café.
+   * Fade out singkat agar tidak terasa "putus" tiba-tiba.
+   */
+  stopBirthdayMusic() {
+    if (!this._birthdayAudio) return;
+    const audio = this._birthdayAudio;
+    const fadeStep = 0.05;
+    const fadeInterval = setInterval(() => {
+      if (audio.volume > fadeStep) {
+        audio.volume -= fadeStep;
+      } else {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.volume = 0.5; // reset volume untuk pemutaran berikutnya
+        clearInterval(fadeInterval);
+      }
+    }, 40);
+  },
 };
+
+// ============================================
+// PATH FILE MUSIK ULANG TAHUN
+// Ganti path ini sesuai nama file yang kamu taruh di assets/sounds/
+// ============================================
+const BIRTHDAY_MUSIC_SRC = '../assets/song.mp3'; // ganti nama file sesuai yang kamu pakai
 
 export default SoundManager;

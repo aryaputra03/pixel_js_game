@@ -93,6 +93,8 @@ export const GARDEN_ANIMAL_DIALOGS = {
         // Penutup cepat karena tidak bisa diam terlalu lama.
         text: 'OKE MAKASIH UDAH MAMPIR!! *langsung lari lagi dengan kecepatan penuh*',
       },
+
+      //
     ],
   },
 };

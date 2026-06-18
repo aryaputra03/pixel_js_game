@@ -102,6 +102,6 @@ export const CAFE_NPCS = [
 export const CAFE_ROOM_LABELS = [
   { name: 'Dapur Kopi', col: 1, row: 1 },
   { name: 'Area Duduk', col: 4, row: 4 },
-  { name: 'Meja Favorit', col: 9, row: 7 },
-  { name: 'Sudut Tenang', col: 11, row: 7 }, // area Arya duduk
+  { name: '🎉 Pesta Ultah', col: 9, row: 7 },
+  { name: '', col: 11, row: 7 }, // area Arya duduk
 ];

@@ -67,11 +67,11 @@ export const LOCKED_DOOR = { col: 13, row: 8 };
 // ROOM LABELS — info nama ruangan
 // ============================================
 export const ROOM_LABELS = [
-  { name: '[NAMA RUANG 1]', col: 1, row: 1 },
-  { name: '[NAMA RUANG 2]', col: 6, row: 1 },
-  { name: '[NAMA RUANG 3]', col: 11, row: 1 },
-  { name: '[NAMA LORONG]', col: 1, row: 6 },
-  { name: '[NAMA AULA]', col: 7, row: 6 },
+  { name: 'Kasir', col: 1, row: 1 },
+  { name: 'Indoor', col: 6, row: 1 },
+  { name: 'Indoor', col: 11, row: 1 },
+  { name: 'Lorong', col: 1, row: 6 },
+  { name: 'Aula', col: 7, row: 6 },
 ];
 
 // ============================================
@@ -89,7 +89,7 @@ export const NPCS = [
     row: 1,
     dialogId: 'npc_ruang_santai',
     questTrigger: 'quest_01',
-    label: '[NAMA NPC 1]',
+    label: 'Nabila',
     color: '#E8A838',
   },
   {
@@ -98,7 +98,7 @@ export const NPCS = [
     row: 2,
     dialogId: 'npc_markas',
     questTrigger: 'quest_02',
-    label: '[NAMA NPC 2]',
+    label: 'Yola',
     color: '#38C4E8',
   },
   {
@@ -107,7 +107,7 @@ export const NPCS = [
     row: 2,
     dialogId: 'npc_pojok_cerita',
     questTrigger: 'quest_03',
-    label: '[NAMA NPC 3]',
+    label: 'Siska',
     color: '#E838A0',
   },
 ];

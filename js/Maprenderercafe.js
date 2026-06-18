@@ -362,6 +362,97 @@ function drawWallCafe(ctx, x, y, col, row) {
 
   ctx.fillStyle = 'rgba(0,0,0,0.08)';
   ctx.fillRect(x + S - 2, y, 2, S);
+
+  // ── Dekorasi ulang tahun di tembok atas ──
+  drawBirthdayWallDecor(ctx, x, y, col, row, S);
+}
+
+/**
+ * drawBirthdayWallDecor(ctx, x, y, col, row, S)
+ * Garland bendera segitiga + balon menempel di tembok bagian atas (row 0).
+ * Hanya digambar di tile tembok baris paling atas agar tidak berulang
+ * di setiap baris tembok.
+ */
+function drawBirthdayWallDecor(ctx, x, y, col, row) {
+  const S = TILE_SIZE_CAFE;
+  if (row !== 0) return; // hanya di baris tembok paling atas
+
+  // ── Garland segitiga (bunting flags) menggantung dari plafon ──
+  const flagColors = ['#FF6B81', '#FFD166', '#6FCF97', '#56CCF2', '#BB6BD9'];
+  const flagIdx = col % flagColors.length;
+  const flagColor = flagColors[flagIdx];
+
+  // Tali garland melintang
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x, y + 5);
+  ctx.quadraticCurveTo(x + S / 2, y + 9, x + S, y + 5);
+  ctx.stroke();
+
+  // Bendera segitiga kecil menggantung
+  const fx = x + S / 2 - 4;
+  const fy = y + 7;
+  ctx.fillStyle = flagColor;
+  ctx.beginPath();
+  ctx.moveTo(fx, fy);
+  ctx.lineTo(fx + 8, fy);
+  ctx.lineTo(fx + 4, fy + 9);
+  ctx.closePath();
+  ctx.fill();
+
+  // Aksen putih kecil di bendera
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.fillRect(fx + 2, fy + 1, 4, 1);
+
+  // ── Balon sesekali (tidak di setiap tile, biar tidak penuh) ──
+  if ((col * 7 + 3) % 4 === 0) {
+    drawWallBalloon(
+      ctx,
+      x + S / 2,
+      y + S - 2,
+      flagColors[(col + 2) % flagColors.length]
+    );
+  }
+}
+
+/**
+ * drawWallBalloon(ctx, cx, by, color)
+ * Balon kecil menempel di tembok, melayang pelan (animasi sin halus).
+ */
+function drawWallBalloon(ctx, cx, by, color) {
+  const t = Date.now() / 1000;
+  const floatY = Math.sin(t * 1.3 + cx * 0.1) * 2;
+  const cy = by + floatY;
+
+  // Tali balon
+  ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy + 6);
+  ctx.lineTo(cx, cy + 14);
+  ctx.stroke();
+
+  // Badan balon (oval)
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, 5, 6.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Highlight balon
+  ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  ctx.beginPath();
+  ctx.ellipse(cx - 1.5, cy - 2, 1.6, 2.2, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Simpul kecil di bawah
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(cx - 1.5, cy + 5.5);
+  ctx.lineTo(cx + 1.5, cy + 5.5);
+  ctx.lineTo(cx, cy + 7.5);
+  ctx.closePath();
+  ctx.fill();
 }
 
 function drawWindow(ctx, x, y, col, row) {
@@ -910,9 +1001,65 @@ const ARYA = {
 };
 
 /**
+ * drawPartyHat(ctx, x, py2)
+ * Topi pesta ulang tahun kerucut di kepala Arya — biru-kuning
+ * dengan pom-pom putih di puncak dan garis spiral dekorasi.
+ *
+ * @param {number} x   - posisi x kepala NPC
+ * @param {number} py2 - posisi y kepala NPC (sudah termasuk bob animation)
+ */
+function drawPartyHat(ctx, x, py2) {
+  const cx = x + 12; // tengah kepala (kepala lebar 12px: x+6 s.d x+18)
+  const hatTopY = py2 - 9; // puncak topi
+  const hatBaseY = py2 + 1; // dasar topi (menempel di atas kepala)
+
+  // ── Badan topi (kerucut) ──
+  ctx.fillStyle = '#4A7AC8'; // biru — selaras shirt Arya
+  ctx.beginPath();
+  ctx.moveTo(cx - 7, hatBaseY);
+  ctx.lineTo(cx + 7, hatBaseY);
+  ctx.lineTo(cx, hatTopY);
+  ctx.closePath();
+  ctx.fill();
+
+  // Garis dekorasi spiral kuning
+  ctx.strokeStyle = '#FFD166';
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(cx - 5, hatBaseY - 1);
+  ctx.lineTo(cx - 1, hatTopY + 4);
+  ctx.moveTo(cx + 5, hatBaseY - 1);
+  ctx.lineTo(cx + 1, hatTopY + 4);
+  ctx.stroke();
+
+  // Highlight sisi kiri topi
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.beginPath();
+  ctx.moveTo(cx - 6, hatBaseY);
+  ctx.lineTo(cx - 1, hatTopY + 1);
+  ctx.lineTo(cx - 2, hatBaseY);
+  ctx.closePath();
+  ctx.fill();
+
+  // ── Tali pinggir bawah topi ──
+  ctx.fillStyle = '#FF6B81';
+  ctx.fillRect(cx - 7, hatBaseY - 1, 14, 2);
+
+  // ── Pom-pom putih di puncak ──
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.arc(cx, hatTopY, 2.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(220,220,220,0.6)';
+  ctx.beginPath();
+  ctx.arc(cx + 0.6, hatTopY + 0.6, 1, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/**
  * drawMaleNPC(ctx, x, y, isNearby, isInteracted)
  * Pixel art Arya — menghadap depan (facing down = ke camera)
- * dengan animasi idle bob ringan.
+ * dengan animasi idle bob ringan, plus topi pesta ulang tahun.
  */
 function drawMaleNPC(ctx, x, y, isNearby, isInteracted) {
   const bob = Math.floor(Date.now() / 700) % 2 === 0 ? 0 : -1;
@@ -1012,6 +1159,9 @@ function drawMaleNPC(ctx, x, y, isNearby, isInteracted) {
 
   // Sedikit bayangan di bawah rahang (kontur maskulin)
   px(ctx, x + 7, py2 + 9, 'rgba(0,0,0,0.12)', 10, 1);
+
+  // ── Topi pesta ulang tahun (party hat) ──
+  drawPartyHat(ctx, x, py2);
 
   // ── Cangkir kopi di depan Arya (di meja) ──
   // Digambar sedikit di bawah NPC agar terlihat di depannya
@@ -1243,6 +1393,137 @@ export function renderCafeMap(ctx) {
   ctx.fillRect(0, 0, cols * S, rows * S);
 
   drawCounterOverlays(ctx);
+  drawBirthdayCake(ctx); // kue ulang tahun di meja Arya
+  drawFloatingConfetti(ctx); // confetti melayang di seluruh ruangan
+}
+
+/**
+ * drawBirthdayCake(ctx)
+ * Kue ulang tahun pixel art di atas meja Arya (col 12, row 7).
+ * Lilin menyala dengan animasi flicker.
+ */
+function drawBirthdayCake(ctx) {
+  const S = TILE_SIZE_CAFE;
+  const tableCol = 12,
+    tableRow = 7;
+  const tx = tableCol * S;
+  const ty = tableRow * S;
+
+  // Posisi kue — sedikit di atas tengah meja (meja sudah punya gambar sendiri)
+  const cx = tx + S / 2;
+  const cy = ty + S / 2 - 3;
+
+  // ── Piring ──
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + 7, 11, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(200,200,210,0.6)';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + 8, 9, 3, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ── Lapisan bawah kue (coklat) ──
+  ctx.fillStyle = '#7A4A28';
+  ctx.fillRect(cx - 9, cy - 1, 18, 7);
+  ctx.fillStyle = '#9A6238';
+  ctx.fillRect(cx - 9, cy - 1, 18, 2);
+
+  // ── Lapisan atas kue (pink/krim) ──
+  ctx.fillStyle = '#F2A8C0';
+  ctx.fillRect(cx - 7, cy - 6, 14, 6);
+  ctx.fillStyle = '#FFC4DA';
+  ctx.fillRect(cx - 7, cy - 6, 14, 2);
+
+  // ── Drip krim turun dari atas ──
+  ctx.fillStyle = '#FFF0F5';
+  for (let i = -6; i <= 6; i += 3) {
+    ctx.fillRect(cx + i, cy - 6, 2, 3 + (Math.abs(i) % 2));
+  }
+
+  // ── Hiasan bola-bola kecil warna ──
+  const dotColors = ['#FF6B81', '#6FCF97', '#56CCF2', '#FFD166'];
+  for (let i = 0; i < 4; i++) {
+    ctx.fillStyle = dotColors[i % dotColors.length];
+    ctx.beginPath();
+    ctx.arc(cx - 6 + i * 4, cy - 2, 1.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // ── Lilin + api dengan flicker ──
+  const candleX = [cx - 4, cx, cx + 4];
+  const flicker = Math.sin(Date.now() / 120) * 0.5 + 0.5;
+
+  for (const lx of candleX) {
+    // Batang lilin
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(lx - 1, cy - 11, 2, 5);
+    ctx.fillStyle = '#FF6B81';
+    ctx.fillRect(lx - 1, cy - 11, 2, 1);
+
+    // Api lilin — glow + inti
+    const glowR = 3 + flicker * 1;
+    const grad = ctx.createRadialGradient(lx, cy - 13, 0, lx, cy - 13, glowR);
+    grad.addColorStop(0, 'rgba(255,220,120,0.8)');
+    grad.addColorStop(1, 'rgba(255,180,60,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(lx, cy - 13, glowR, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#FFE066';
+    ctx.beginPath();
+    ctx.ellipse(lx, cy - 12.5, 1.2, 2 + flicker * 0.6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#FF8C42';
+    ctx.beginPath();
+    ctx.ellipse(lx, cy - 12, 0.7, 1.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+/**
+ * drawFloatingConfetti(ctx)
+ * Confetti kecil melayang turun pelan di seluruh ruangan café.
+ * Posisi pseudo-random tapi stabil (berdasarkan index + waktu),
+ * jadi terlihat halus tanpa state tambahan yang perlu disimpan.
+ */
+const CONFETTI_COLORS = [
+  '#FF6B81',
+  '#FFD166',
+  '#6FCF97',
+  '#56CCF2',
+  '#BB6BD9',
+  '#FFFFFF',
+];
+const CONFETTI_COUNT = 18;
+
+function drawFloatingConfetti(ctx) {
+  const t = Date.now() / 1000;
+  const W = TILE_SIZE_CAFE * 15;
+  const H = TILE_SIZE_CAFE * 10;
+
+  for (let i = 0; i < CONFETTI_COUNT; i++) {
+    // Seed pseudo-random stabil per index
+    const seedX = (i * 137.5) % W;
+    const speed = 12 + (i % 5) * 4;
+    const fallY = ((t * speed + i * 53) % (H + 20)) - 10;
+    const swayX = Math.sin(t * 1.5 + i) * 6;
+
+    const x = seedX + swayX;
+    const y = fallY;
+    const color = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+    const size = 2 + (i % 3);
+    const rotation = t * 2 + i;
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rotation);
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.55;
+    ctx.fillRect(-size / 2, -size / 2, size, size * 0.6);
+    ctx.restore();
+  }
 }
 
 // ============================================

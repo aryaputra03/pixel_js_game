@@ -256,6 +256,7 @@ function transitionToMap(targetMap) {
       setCollisionFn(isSolidCafeAtPixel);
       currentMap = 'cafe';
       SoundManager.dialogOpen();
+      SoundManager.playBirthdayMusic(); // ← musik ulang tahun mulai
     } else if (targetMap === 'garden') {
       _cafeSavedX = GameState.player.x;
       _cafeSavedY = GameState.player.y;
@@ -264,18 +265,21 @@ function transitionToMap(targetMap) {
       setCollisionFn(isSolidGardenAtPixel);
       currentMap = 'garden';
       SoundManager.questNew();
+      SoundManager.stopBirthdayMusic(); // ← keluar café → musik berhenti
     } else if (targetMap === 'cafe_from_garden') {
       GameState.player.x = _cafeSavedX > 0 ? _cafeSavedX : 384;
       GameState.player.y = _cafeSavedY > 0 ? _cafeSavedY : 256;
       setCollisionFn(isSolidCafeAtPixel);
       currentMap = 'cafe';
       SoundManager.dialogClose();
+      SoundManager.playBirthdayMusic(); // ← balik ke café → musik nyala lagi
     } else {
       GameState.player.x = _map1SavedX > 0 ? _map1SavedX : 380;
       GameState.player.y = _map1SavedY > 0 ? _map1SavedY : 256;
       setCollisionFn(null);
       currentMap = 'map1';
       SoundManager.dialogClose();
+      SoundManager.stopBirthdayMusic(); // ← keluar café ke map1 → musik berhenti
     }
 
     _fadeDir = -1;
