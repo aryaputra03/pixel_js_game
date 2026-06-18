@@ -113,7 +113,7 @@ export function renderNPCs(ctx, nearbyNPC) {
 
 function renderInteractPrompt(ctx, npc, bounce) {
   const isMobile = 'ontouchstart' in window;
-  const label = isMobile ? '[ TAP ]' : '[ E ]';
+  const label = isMobile ? '[ E ]' : '[ E ]';
   const text = `${label} Ngobrol`;
   const cx = npc.x + npc.width / 2;
   const cy = npc.y - 16 + bounce;
