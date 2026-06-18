@@ -476,7 +476,7 @@ export function renderLockedDoorPrompt(ctx, hasKey) {
 
   const isMobile = 'ontouchstart' in window;
   const text = hasKey
-    ? `${isMobile ? '[TAP]' : '[E]'} Buka Pintu`
+    ? `${isMobile ? '[E]' : '[E]'} Buka Pintu`
     : '🔒 Butuh Kunci...';
 
   const bounce = Math.sin(Date.now() / 400) * 2;

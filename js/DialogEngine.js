@@ -106,7 +106,7 @@ const DialogEngine = {
     dialogBox?.classList.remove('hidden', 'closing');
     if (dialogHint)
       dialogHint.textContent = isMobile()
-        ? 'TAP OK untuk lanjut'
+        ? 'E untuk lanjut'
         : 'SPACE untuk lanjut';
   },
 
