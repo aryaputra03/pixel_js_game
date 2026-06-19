@@ -394,6 +394,10 @@ export const DIALOGS = {
       },
       {
         speaker: 'Arya',
+        text: 'Makasih ya sudah diajarin cara bikin kopi yang baik dan benar',
+      },
+      {
+        speaker: 'Arya',
         text: '73656d6f67612073656d616b696e2073756b7365732c2073656861742073656c616c752c2074616261682073616d6120637573746f6d657220616e6420646f20776861746576657220796f752077616e74',
       },
       {

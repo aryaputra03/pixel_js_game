@@ -183,7 +183,7 @@ export function renderGardenNPCs(ctx, nearbyNPC) {
  */
 function renderGardenNPCPrompt(ctx, npc, bounce) {
   const isMobile = 'ontouchstart' in window;
-  const key = isMobile ? '[ TAP ]' : '[ E ]';
+  const key = isMobile ? '[ E ]' : '[ E ]';
 
   // Teks aksi berbeda per hewan
   let action = 'Sapa';
@@ -502,7 +502,7 @@ export function renderGardenRoomLabels(ctx) {
 
 export function renderGardenExitPrompt(ctx) {
   const isMobile = 'ontouchstart' in window;
-  const text = isMobile ? '[ TAP ] Kembali ke Café' : '[ E ] Kembali ke Café';
+  const text = isMobile ? '[ E ] Kembali ke Café' : '[ E ] Kembali ke Café';
   const cx = 80,
     cy = 160 + Math.sin(Date.now() / 400) * 3;
   const pw = ctx.measureText(text).width + 14;

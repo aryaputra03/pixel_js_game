@@ -1234,7 +1234,7 @@ export function renderCafeNPCs(ctx, nearbyCafeNPC) {
 
 function renderCafeNPCPrompt(ctx, npc, bounce) {
   const isMobile = 'ontouchstart' in window;
-  const label = isMobile ? '[ TAP ]' : '[ E ]';
+  const label = isMobile ? '[ E ]' : '[ E ]';
   const text = `${label} Ngobrol`;
 
   const cx = npc.x + npc.width / 2;
@@ -1295,7 +1295,7 @@ export function renderCafeOpenDoorPrompt(ctx) {
   const bounce = Math.sin(Date.now() / 400) * 2;
   const cx = doorX + S / 2;
   const cy = doorY - 16 + bounce;
-  const text = 'ontouchstart' in window ? '[TAP] Lanjut' : '[E] Lanjut';
+  const text = 'ontouchstart' in window ? '[E] Lanjut' : '[E] Lanjut';
   const pWidth = ctx.measureText(text).width + 12;
 
   ctx.fillStyle = 'rgba(0,120,60,0.88)';
@@ -1318,7 +1318,7 @@ export function renderCafeExitPrompt(ctx) {
   const bounce = Math.sin(Date.now() / 400) * 2;
   const cx = doorX + S / 2;
   const cy = doorY - 10 + bounce;
-  const text = `${'ontouchstart' in window ? '[TAP]' : '[E]'} Keluar`;
+  const text = `${'ontouchstart' in window ? '[E]' : '[E]'} Keluar`;
   const pWidth = ctx.measureText(text).width + 12;
 
   ctx.fillStyle = 'rgba(0,120,180,0.85)';

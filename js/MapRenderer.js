@@ -511,7 +511,7 @@ export function renderOpenDoorPrompt(ctx) {
   const doorY = LOCKED_DOOR.row * S;
 
   const isMobile = 'ontouchstart' in window;
-  const text = `${isMobile ? '[TAP]' : '[E]'} Masuk Café ☕`;
+  const text = `${isMobile ? '[E]' : '[E]'} Masuk Café ☕`;
 
   const bounce = Math.sin(Date.now() / 400) * 2;
   const cx = doorX + S / 2;
