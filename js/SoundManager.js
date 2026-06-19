@@ -257,6 +257,6 @@ const SoundManager = {
 // PATH FILE MUSIK ULANG TAHUN
 // Ganti path ini sesuai nama file yang kamu taruh di assets/sounds/
 // ============================================
-const BIRTHDAY_MUSIC_SRC = '../assets/song.mp3'; // ganti nama file sesuai yang kamu pakai
+const BIRTHDAY_MUSIC_SRC = 'song.mp3'; // ganti nama file sesuai yang kamu pakai
 
 export default SoundManager;
